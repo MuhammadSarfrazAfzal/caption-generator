@@ -182,5 +182,3 @@ export function VideoPlayer({
     </div>
   );
 }
-
-// Safe zone guides for 9:16 vertical reels
