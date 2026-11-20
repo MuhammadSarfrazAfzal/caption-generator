@@ -541,6 +541,3 @@ export function StyleStudio({
     </aside>
   );
 }
-
-// Font styling controls
-// Stroke and glow settings
