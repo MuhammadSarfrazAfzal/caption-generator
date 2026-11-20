@@ -409,3 +409,5 @@ function hexToRgba(hex = '#000000', alpha = 1) {
   const b = num & 255;
   return `rgba(${r}, ${g}, ${b}, ${alpha ?? 1})`;
 }
+
+// WebVTT and JSON export support
