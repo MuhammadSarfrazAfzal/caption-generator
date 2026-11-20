@@ -190,5 +190,3 @@ export function SubtitleList({
     </aside>
   );
 }
-
-// Inline editing and timestamp controls
