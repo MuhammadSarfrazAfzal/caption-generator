@@ -1,0 +1,113 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --bg-main: #0a0b0e;
+    --bg-panel: #13151b;
+    --bg-card: #1a1d26;
+    --bg-card-hover: #222634;
+    --bg-input: #111319;
+    --border-color: #272a38;
+    --border-highlight: #3b4055;
+    --accent-cyan: #00f2fe;
+    --accent-blue: #4facfe;
+    --accent-mint: #00e5ff;
+    --accent-yellow: #ffe600;
+    --accent-pink: #ff2e93;
+    --text-primary: #ffffff;
+    --text-secondary: #9ca3af;
+    --text-muted: #64748b;
+  }
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: #0a0b0e;
+  color: #ffffff;
+  overflow: hidden;
+  user-select: none;
+  height: 100vh;
+  width: 100vw;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #2b3042;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3e455e;
+}
+
+/* Range input styling */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: #222634;
+  height: 5px;
+  border-radius: 4px;
+  outline: none;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #00f2fe;
+  cursor: pointer;
+  box-shadow: 0 0 8px rgba(0, 242, 254, 0.5);
+  transition: transform 0.15s ease;
+}
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+/* CapCut Glassmorphism */
+.glass-panel {
+  background: rgba(19, 21, 27, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid #272a38;
+}
+
+.glass-modal {
+  background: rgba(16, 18, 24, 0.95);
+  backdrop-filter: blur(16px);
+  border: 1px solid #3b4055;
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.8), 0 0 20px rgba(0, 242, 254, 0.1);
+}
+
+/* Glow effects */
+.glow-cyan {
+  box-shadow: 0 0 15px rgba(0, 242, 254, 0.35);
+}
+
+.glow-yellow {
+  box-shadow: 0 0 15px rgba(255, 230, 0, 0.35);
+}
+
+/* Safe area guidelines */
+.safe-area-overlay {
+  pointer-events: none;
+  position: absolute;
+  top: 10%;
+  bottom: 15%;
+  left: 8%;
+  right: 8%;
+  border: 1.5px dashed rgba(0, 242, 254, 0.45);
+  border-radius: 8px;
+}
