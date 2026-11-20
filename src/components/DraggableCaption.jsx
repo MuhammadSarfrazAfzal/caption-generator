@@ -456,11 +456,3 @@ function hexToRgba(hex = '#000000', alpha = 1) {
 }
 
 
-
-// Interactive drag and drop repositioning
-// Word by word karaoke highlight
-// Floating action toolbar
-// Quick size presets S/M/L/XL
-// Persistent selection on click
-// Proximity detection within 50px
-// 4-corner scale and horizontal width handles
