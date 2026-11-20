@@ -543,3 +543,4 @@ export function StyleStudio({
 }
 
 // Font styling controls
+// Stroke and glow settings
