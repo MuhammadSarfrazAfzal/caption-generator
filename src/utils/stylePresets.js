@@ -449,8 +449,3 @@ export const FONT_OPTIONS = [
   { name: 'Inter (Clean & Sleek)', value: "'Inter', sans-serif" },
   { name: 'System Sans-Serif', value: "sans-serif" },
 ];
-
-// MrBeast and Hormozi viral typography presets
-// Ali Abdaal and Cyberpunk styles
-// Neon lime and barbie pink styles
-// Flame Orange, Royal Gold and Purple Majesty
