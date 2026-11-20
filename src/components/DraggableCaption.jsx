@@ -463,3 +463,4 @@ function hexToRgba(hex = '#000000', alpha = 1) {
 // Quick size presets S/M/L/XL
 // Persistent selection on click
 // Proximity detection within 50px
+// 4-corner scale and horizontal width handles
