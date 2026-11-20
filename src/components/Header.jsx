@@ -14,7 +14,7 @@ import {
   Database,
   Palette,
   Settings,
-  Film
+  Pencil
 } from 'lucide-react';
 
 export function Header({
@@ -64,9 +64,9 @@ export function Header({
   const handleClose = () => window.electronAPI?.closeWindow?.();
 
   return (
-    <header className="h-15 px-6 bg-white border-b border-zinc-200/80 flex items-center justify-between select-none rounded-t-[26px]">
-      {/* Left: Project Title & Format Subtitle */}
-      <div className="flex items-center gap-3">
+    <header className="h-18 px-10 bg-white border-b border-zinc-200/80 flex items-center justify-between select-none rounded-t-[28px]">
+      {/* Left: Project Title & Format Subtitle with generous margin & padding */}
+      <div className="flex items-center gap-4">
         <div className="flex flex-col justify-center">
           {isEditingTitle ? (
             <input
@@ -76,56 +76,57 @@ export function Header({
               onChange={(e) => setTempTitle(e.target.value)}
               onBlur={handleTitleSubmit}
               onKeyDown={(e) => e.key === 'Enter' && handleTitleSubmit()}
-              className="text-sm font-bold text-zinc-900 bg-zinc-100 px-2 py-0.5 rounded-md outline-none border border-lime-500 font-sans"
+              className="text-base font-bold text-zinc-900 bg-zinc-100 px-3 py-1 rounded-lg outline-none border border-lime-500 font-sans shadow-inner"
             />
           ) : (
             <div 
               onClick={() => { setTempTitle(displayTitle); setIsEditingTitle(true); }}
-              className="flex items-center gap-1.5 cursor-pointer group"
+              className="flex items-center gap-2 cursor-pointer group py-0.5"
               title="Click to rename project"
             >
-              <h1 className="text-[15px] font-bold text-zinc-900 tracking-tight group-hover:text-zinc-600 transition-colors">
+              <h1 className="text-[17px] font-extrabold text-zinc-900 tracking-tight group-hover:text-zinc-600 transition-colors">
                 {displayTitle}
               </h1>
+              <Pencil className="w-3 h-3 text-zinc-300 opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>
           )}
-          <span className="text-[11px] text-zinc-400 font-medium tracking-tight -mt-0.5">
+          <span className="text-[12px] text-zinc-400 font-medium tracking-tight mt-0.5">
             {captionCount} cues · SubRip (.{exportFormat || 'srt'})
           </span>
         </div>
       </div>
 
       {/* Right: Actions, Format Dropdown, Download Button, Window Controls */}
-      <div className="flex items-center gap-1.5">
+      <div className="flex items-center gap-2">
         {/* Undo / Redo */}
-        <div className="flex items-center">
+        <div className="flex items-center mr-1">
           <button
             onClick={onUndo}
             disabled={!canUndo}
-            className={`p-1.5 rounded-lg transition-colors ${
+            className={`p-2 rounded-xl transition-colors ${
               canUndo ? 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100 cursor-pointer' : 'text-zinc-300 cursor-not-allowed'
             }`}
             title="Undo (Ctrl+Z)"
           >
-            <RotateCcw className="w-3.5 h-3.5" />
+            <RotateCcw className="w-4 h-4" />
           </button>
 
           <button
             onClick={onRedo}
             disabled={!canRedo}
-            className={`p-1.5 rounded-lg transition-colors ${
+            className={`p-2 rounded-xl transition-colors ${
               canRedo ? 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100 cursor-pointer' : 'text-zinc-300 cursor-not-allowed'
             }`}
             title="Redo (Ctrl+Y)"
           >
-            <RotateCw className="w-3.5 h-3.5" />
+            <RotateCw className="w-4 h-4" />
           </button>
         </div>
 
         {/* Upload Video / File */}
         <button
           onClick={onOpenVideo}
-          className="p-1.5 rounded-lg text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100 transition-colors cursor-pointer"
+          className="p-2 rounded-xl text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100 transition-colors cursor-pointer"
           title="Open Video File"
         >
           <FolderOpen className="w-4 h-4" />
@@ -135,7 +136,7 @@ export function Header({
         <button
           onClick={onGenerateCaptions}
           disabled={isGenerating}
-          className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+          className={`p-2 rounded-xl transition-colors cursor-pointer ${
             isGenerating ? 'text-lime-600 animate-spin bg-lime-50' : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100'
           }`}
           title="Transcribe speech to Roman Urdu with Gemini AI"
@@ -146,7 +147,7 @@ export function Header({
         {/* Style Studio Toggle */}
         <button
           onClick={onToggleStyleStudio}
-          className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+          className={`p-2 rounded-xl transition-colors cursor-pointer ${
             isStyleStudioOpen ? 'bg-zinc-100 text-zinc-950 font-bold' : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100'
           }`}
           title="Toggle 16 Style Presets"
@@ -157,7 +158,7 @@ export function Header({
         {/* Projects DB */}
         <button
           onClick={onOpenProjects}
-          className="p-1.5 rounded-lg text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100 transition-colors cursor-pointer"
+          className="p-2 rounded-xl text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100 transition-colors cursor-pointer"
           title="Saved Projects Database"
         >
           <Database className="w-4 h-4" />
@@ -166,23 +167,23 @@ export function Header({
         {/* Settings */}
         <button
           onClick={onOpenSettings}
-          className="p-1.5 rounded-lg text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100 transition-colors cursor-pointer"
+          className="p-2 rounded-xl text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100 transition-colors cursor-pointer"
           title="Settings (API Key & Preferences)"
         >
           <Settings className="w-4 h-4" />
         </button>
 
         {/* Subtle Divider */}
-        <div className="h-4 w-px bg-zinc-200 mx-1.5" />
+        <div className="h-5 w-px bg-zinc-200 mx-1.5" />
 
         {/* Format Selector Dropdown Pill (.srt) */}
         <div className="relative">
           <button
             onClick={() => setIsFormatOpen(!isFormatOpen)}
-            className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-700 text-xs font-semibold shadow-2xs cursor-pointer transition-all"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-700 text-xs font-semibold shadow-2xs cursor-pointer transition-all"
           >
             <span>.{exportFormat}</span>
-            <ChevronDown className="w-3 h-3 text-zinc-400" />
+            <ChevronDown className="w-3.5 h-3.5 text-zinc-400" />
           </button>
 
           {isFormatOpen && (
@@ -209,35 +210,35 @@ export function Header({
         {/* Vibrant Lime Green Download CTA */}
         <button
           onClick={onOpenExport}
-          className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-[#bbf421] hover:bg-[#a3e635] text-zinc-950 font-bold text-xs tracking-tight shadow-2xs hover:shadow-xs transition-all cursor-pointer active:scale-95 ml-1"
+          className="flex items-center gap-1.5 px-4.5 py-2 rounded-xl bg-[#bbf421] hover:bg-[#a3e635] text-zinc-950 font-bold text-xs tracking-tight shadow-2xs hover:shadow-xs transition-all cursor-pointer active:scale-95 ml-1"
         >
-          <Download className="w-3.5 h-3.5 stroke-[2.5]" />
+          <Download className="w-4 h-4 stroke-[2.5]" />
           <span>Download</span>
         </button>
 
         {/* Window controls if Electron */}
         {window.electronAPI?.isElectron && (
-          <div className="flex items-center gap-0.5 ml-2 pl-2 border-l border-zinc-200">
+          <div className="flex items-center gap-1 ml-2.5 pl-2.5 border-l border-zinc-200">
             <button
               onClick={handleMinimize}
-              className="p-1 rounded-md hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700 cursor-pointer"
+              className="p-1.5 rounded-lg hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700 cursor-pointer"
               title="Minimize"
             >
-              <Minus className="w-3 h-3" />
+              <Minus className="w-3.5 h-3.5" />
             </button>
             <button
               onClick={handleMaximize}
-              className="p-1 rounded-md hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700 cursor-pointer"
+              className="p-1.5 rounded-lg hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700 cursor-pointer"
               title="Maximize"
             >
-              <Square className="w-2.5 h-2.5" />
+              <Square className="w-3 h-3" />
             </button>
             <button
               onClick={handleClose}
-              className="p-1 rounded-md hover:bg-red-50 hover:text-red-500 text-zinc-400 cursor-pointer"
+              className="p-1.5 rounded-lg hover:bg-red-50 hover:text-red-500 text-zinc-400 cursor-pointer"
               title="Close"
             >
-              <X className="w-3 h-3" />
+              <X className="w-3.5 h-3.5" />
             </button>
           </div>
         )}

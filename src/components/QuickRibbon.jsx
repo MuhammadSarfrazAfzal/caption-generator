@@ -21,12 +21,12 @@ export function QuickRibbon({
   isSaved = true
 }) {
   return (
-    <div className="h-11 px-6 bg-white border-b border-zinc-200/80 flex items-center justify-between text-xs text-zinc-600 select-none">
+    <div className="h-12 px-10 bg-white border-b border-zinc-200/80 flex items-center justify-between text-xs text-zinc-600 select-none">
       {/* Left Tool Ribbon Items */}
-      <div className="flex items-center gap-6 font-medium">
+      <div className="flex items-center gap-7 font-medium">
         <button 
           onClick={onOpenTiming}
-          className="flex items-center gap-1.5 hover:text-zinc-950 px-1 py-1 rounded-md transition-colors cursor-pointer"
+          className="flex items-center gap-1.5 hover:text-zinc-950 px-2 py-1 rounded-lg hover:bg-zinc-100 transition-colors cursor-pointer"
         >
           <Clock className="w-3.5 h-3.5 text-zinc-400" />
           <span>Timing</span>
@@ -34,7 +34,7 @@ export function QuickRibbon({
 
         <button 
           onClick={onFixAndCheck}
-          className="flex items-center gap-1.5 hover:text-zinc-950 px-1 py-1 rounded-md transition-colors cursor-pointer"
+          className="flex items-center gap-1.5 hover:text-zinc-950 px-2 py-1 rounded-lg hover:bg-zinc-100 transition-colors cursor-pointer"
           title="Auto-fix punctuation, short 3-words split & Roman Urdu formatting"
         >
           <Wand2 className="w-3.5 h-3.5 text-zinc-400" />
@@ -43,7 +43,7 @@ export function QuickRibbon({
 
         <button 
           onClick={onFindAndReplace}
-          className="flex items-center gap-1.5 hover:text-zinc-950 px-1 py-1 rounded-md transition-colors cursor-pointer"
+          className="flex items-center gap-1.5 hover:text-zinc-950 px-2 py-1 rounded-lg hover:bg-zinc-100 transition-colors cursor-pointer"
         >
           <Search className="w-3.5 h-3.5 text-zinc-400" />
           <span>Find & replace</span>
@@ -51,7 +51,7 @@ export function QuickRibbon({
 
         <button 
           onClick={onOpenExport}
-          className="flex items-center gap-1.5 hover:text-zinc-950 px-1 py-1 rounded-md transition-colors cursor-pointer"
+          className="flex items-center gap-1.5 hover:text-zinc-950 px-2 py-1 rounded-lg hover:bg-zinc-100 transition-colors cursor-pointer"
         >
           <FileText className="w-3.5 h-3.5 text-zinc-400" />
           <span>Export</span>
@@ -59,7 +59,7 @@ export function QuickRibbon({
 
         <button 
           onClick={onBurnIntoVideo}
-          className="flex items-center gap-1.5 text-zinc-900 font-semibold hover:text-lime-700 px-1 py-1 rounded-md transition-colors cursor-pointer"
+          className="flex items-center gap-1.5 text-zinc-900 font-semibold hover:text-lime-700 px-2 py-1 rounded-lg hover:bg-lime-50 transition-colors cursor-pointer"
           title="Hardware-accelerated native FFmpeg Video Burn"
         >
           <Film className="w-3.5 h-3.5 text-lime-600" />
@@ -68,7 +68,7 @@ export function QuickRibbon({
 
         <button 
           onClick={onOpenStyleStudio}
-          className="flex items-center gap-1.5 hover:text-zinc-950 px-1 py-1 rounded-md transition-colors cursor-pointer"
+          className="flex items-center gap-1.5 hover:text-zinc-950 px-2 py-1 rounded-lg hover:bg-zinc-100 transition-colors cursor-pointer"
           title="Open CapCut Presets & Styling Studio"
         >
           <Palette className="w-3.5 h-3.5 text-zinc-400" />
@@ -77,7 +77,7 @@ export function QuickRibbon({
 
         <button 
           onClick={onOpenShortcuts}
-          className="flex items-center gap-1.5 hover:text-zinc-950 px-1 py-1 rounded-md transition-colors cursor-pointer"
+          className="flex items-center gap-1.5 hover:text-zinc-950 px-2 py-1 rounded-lg hover:bg-zinc-100 transition-colors cursor-pointer"
         >
           <Keyboard className="w-3.5 h-3.5 text-zinc-400" />
           <span>Shortcuts</span>
@@ -85,7 +85,7 @@ export function QuickRibbon({
       </div>
 
       {/* Right Saved Status Indicator */}
-      <div className="flex items-center gap-1.5 text-zinc-400 font-medium text-[11px]">
+      <div className="flex items-center gap-2 text-zinc-400 font-medium text-[11px]">
         <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
         <span>Saved in this app</span>
       </div>

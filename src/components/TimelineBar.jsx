@@ -99,7 +99,7 @@ export function TimelineBar({
   }, [safeDuration]);
 
   return (
-    <div className="bg-white border-t border-zinc-200/90 px-6 py-3 select-none flex flex-col justify-between rounded-b-[26px]">
+    <div className="bg-white border-t border-zinc-200/90 px-10 py-4 select-none flex flex-col justify-between rounded-b-[28px]">
       {/* Top Instruction Row & Zoom Slider */}
       <div className="flex items-center justify-between text-xs text-zinc-400 pb-2">
         <span className="font-medium text-[11px] text-zinc-400">
