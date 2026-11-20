@@ -1,10 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { 
   Clock, 
   Wand2, 
   Search, 
   FileText, 
-  RefreshCw, 
   Film, 
   Keyboard, 
   Palette,
@@ -22,45 +21,45 @@ export function QuickRibbon({
   isSaved = true
 }) {
   return (
-    <div className="h-10 px-6 bg-white border-b border-zinc-200/80 flex items-center justify-between text-xs text-zinc-600 select-none">
+    <div className="h-11 px-6 bg-white border-b border-zinc-200/80 flex items-center justify-between text-xs text-zinc-600 select-none">
       {/* Left Tool Ribbon Items */}
-      <div className="flex items-center gap-5 font-medium">
+      <div className="flex items-center gap-6 font-medium">
         <button 
           onClick={onOpenTiming}
-          className="flex items-center gap-1.5 hover:text-zinc-950 transition-colors cursor-pointer"
+          className="flex items-center gap-1.5 hover:text-zinc-950 px-1 py-1 rounded-md transition-colors cursor-pointer"
         >
-          <Clock className="w-3.5 h-3.5 text-zinc-500" />
+          <Clock className="w-3.5 h-3.5 text-zinc-400" />
           <span>Timing</span>
         </button>
 
         <button 
           onClick={onFixAndCheck}
-          className="flex items-center gap-1.5 hover:text-zinc-950 transition-colors cursor-pointer"
+          className="flex items-center gap-1.5 hover:text-zinc-950 px-1 py-1 rounded-md transition-colors cursor-pointer"
           title="Auto-fix punctuation, short 3-words split & Roman Urdu formatting"
         >
-          <Wand2 className="w-3.5 h-3.5 text-zinc-500" />
+          <Wand2 className="w-3.5 h-3.5 text-zinc-400" />
           <span>Fix & check</span>
         </button>
 
         <button 
           onClick={onFindAndReplace}
-          className="flex items-center gap-1.5 hover:text-zinc-950 transition-colors cursor-pointer"
+          className="flex items-center gap-1.5 hover:text-zinc-950 px-1 py-1 rounded-md transition-colors cursor-pointer"
         >
-          <Search className="w-3.5 h-3.5 text-zinc-500" />
+          <Search className="w-3.5 h-3.5 text-zinc-400" />
           <span>Find & replace</span>
         </button>
 
         <button 
           onClick={onOpenExport}
-          className="flex items-center gap-1.5 hover:text-zinc-950 transition-colors cursor-pointer"
+          className="flex items-center gap-1.5 hover:text-zinc-950 px-1 py-1 rounded-md transition-colors cursor-pointer"
         >
-          <FileText className="w-3.5 h-3.5 text-zinc-500" />
+          <FileText className="w-3.5 h-3.5 text-zinc-400" />
           <span>Export</span>
         </button>
 
         <button 
           onClick={onBurnIntoVideo}
-          className="flex items-center gap-1.5 text-zinc-900 font-semibold hover:text-lime-600 transition-colors cursor-pointer"
+          className="flex items-center gap-1.5 text-zinc-900 font-semibold hover:text-lime-700 px-1 py-1 rounded-md transition-colors cursor-pointer"
           title="Hardware-accelerated native FFmpeg Video Burn"
         >
           <Film className="w-3.5 h-3.5 text-lime-600" />
@@ -69,18 +68,18 @@ export function QuickRibbon({
 
         <button 
           onClick={onOpenStyleStudio}
-          className="flex items-center gap-1.5 hover:text-zinc-950 transition-colors cursor-pointer"
+          className="flex items-center gap-1.5 hover:text-zinc-950 px-1 py-1 rounded-md transition-colors cursor-pointer"
           title="Open CapCut Presets & Styling Studio"
         >
-          <Palette className="w-3.5 h-3.5 text-zinc-500" />
+          <Palette className="w-3.5 h-3.5 text-zinc-400" />
           <span>Presets & Style</span>
         </button>
 
         <button 
           onClick={onOpenShortcuts}
-          className="flex items-center gap-1.5 hover:text-zinc-950 transition-colors cursor-pointer"
+          className="flex items-center gap-1.5 hover:text-zinc-950 px-1 py-1 rounded-md transition-colors cursor-pointer"
         >
-          <Keyboard className="w-3.5 h-3.5 text-zinc-500" />
+          <Keyboard className="w-3.5 h-3.5 text-zinc-400" />
           <span>Shortcuts</span>
         </button>
       </div>

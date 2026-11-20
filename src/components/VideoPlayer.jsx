@@ -41,6 +41,7 @@ export function VideoPlayer({
   const [isMuted, setIsMuted] = useState(false);
   const [playbackRate, setPlaybackRate] = useState(1);
   const [isSpeedOpen, setIsSpeedOpen] = useState(false);
+  const [isFormatOpen, setIsFormatOpen] = useState(false);
 
   const handleMuteToggle = () => {
     if (!videoRef.current) return;
@@ -83,50 +84,17 @@ export function VideoPlayer({
     return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}.${String(ms).padStart(3, '0')}`;
   };
 
+  const aspectRatios = [
+    { id: 'auto', label: 'Fit' },
+    { id: '9:16', label: '9:16 Reels' },
+    { id: '16:9', label: '16:9' },
+    { id: '1:1', label: '1:1' }
+  ];
+
   return (
-    <div className="flex-1 flex flex-col bg-white p-5 select-none overflow-hidden">
-      {/* Top Format Selector Pill Bar */}
-      <div className="flex items-center justify-between pb-3 text-xs">
-        <div className="flex items-center gap-1.5">
-          <span className="text-zinc-400 font-semibold text-[11px]">Format:</span>
-          {[
-            { id: 'auto', label: 'Fit' },
-            { id: '9:16', label: '9:16 Reels' },
-            { id: '16:9', label: '16:9' },
-            { id: '1:1', label: '1:1' }
-          ].map((item) => (
-            <button
-              key={item.id}
-              onClick={() => onChangeAspectRatio(item.id)}
-              className={`px-2 py-0.5 rounded-lg text-[11px] font-semibold transition-all cursor-pointer ${
-                aspectRatioMode === item.id
-                  ? 'bg-zinc-900 text-white shadow-xs'
-                  : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'
-              }`}
-            >
-              {item.label}
-            </button>
-          ))}
-        </div>
-
-        <div className="flex items-center gap-1.5">
-          <button
-            onClick={onToggleSafeZone}
-            className={`flex items-center gap-1 px-2 py-0.5 rounded-lg text-[11px] font-medium border transition-colors cursor-pointer ${
-              showSafeZone
-                ? 'bg-lime-50 text-lime-800 border-lime-300 font-bold'
-                : 'bg-white text-zinc-500 border-zinc-200 hover:bg-zinc-50'
-            }`}
-            title="Toggle Reels/TikTok Safe Zone Guides"
-          >
-            {showSafeZone ? <Eye className="w-3 h-3 text-lime-600" /> : <EyeOff className="w-3 h-3 text-zinc-400" />}
-            <span>Safe Zones</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Main Video Viewport (Black Stage with Draggable Caption) */}
-      <div className="flex-1 bg-black rounded-xl overflow-hidden relative flex items-center justify-center shadow-inner">
+    <div className="flex-1 flex flex-col bg-white p-5 select-none overflow-hidden justify-between">
+      {/* Main Video Viewport (Clean black box, NO cluttered top row!) */}
+      <div className="flex-1 bg-black rounded-xl overflow-hidden relative flex items-center justify-center shadow-inner min-h-[300px]">
         {videoSrc ? (
           <div
             ref={containerRef}
@@ -145,7 +113,7 @@ export function VideoPlayer({
               playsInline
             />
 
-            {/* Draggable Caption Box with Handles & Proximity Sensor */}
+            {/* Draggable Caption Box with Glass Selection Frame & Proximity Sensor */}
             <DraggableCaption
               caption={activeCaption}
               currentTime={currentTime}
@@ -161,7 +129,7 @@ export function VideoPlayer({
             {showSafeZone && (
               <div className="absolute inset-0 pointer-events-none z-10">
                 <div className="safe-area-overlay" />
-                <div className="absolute top-2 left-3 text-[9px] text-lime-300 font-mono tracking-wider bg-black/80 px-2 py-0.5 rounded border border-lime-500/50">
+                <div className="absolute top-2 left-3 text-[9px] text-[#bbf421] font-mono tracking-wider bg-black/80 px-2 py-0.5 rounded border border-[#84cc16]/50">
                   REELS / TIKTOK SAFE AREA
                 </div>
               </div>
@@ -172,7 +140,7 @@ export function VideoPlayer({
             onClick={onUploadClick}
             className="flex flex-col items-center justify-center p-8 text-center cursor-pointer group"
           >
-            <div className="w-12 h-12 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-lime-400 group-hover:scale-105 transition-all mb-3 shadow-md">
+            <div className="w-12 h-12 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-[#bbf421] group-hover:scale-105 transition-all mb-3 shadow-md">
               <UploadCloud className="w-6 h-6" />
             </div>
             <h3 className="text-sm font-bold text-white mb-1">
@@ -185,14 +153,14 @@ export function VideoPlayer({
         )}
       </div>
 
-      {/* Video Control Bar below video (Exactly as in reference image!) */}
+      {/* Video Control Bar below video (Clean, single unified row matching reference!) */}
       <div className="mt-3.5 flex items-center justify-between text-xs select-none">
         {/* Play/Pause Button & Timecode */}
         <div className="flex items-center gap-3">
           {/* Black Circular Play/Pause Button */}
           <button
             onClick={onPlayPause}
-            className="w-9 h-9 rounded-full bg-zinc-900 hover:bg-zinc-800 active:scale-95 text-white flex items-center justify-center shadow-sm cursor-pointer transition-transform"
+            className="w-9 h-9 rounded-full bg-zinc-900 hover:bg-zinc-800 active:scale-95 text-white flex items-center justify-center shadow-xs cursor-pointer transition-transform"
             title={isPlaying ? "Pause (Space)" : "Play (Space)"}
           >
             {isPlaying ? (
@@ -213,15 +181,59 @@ export function VideoPlayer({
           {activeCaption && (
             <button
               onClick={handlePlayThisCue}
-              className="text-xs font-semibold text-lime-700 hover:text-lime-800 bg-lime-50 hover:bg-lime-100 px-2 py-0.5 rounded-lg border border-lime-300/80 transition-colors cursor-pointer ml-1"
+              className="text-xs font-semibold text-lime-800 hover:text-lime-900 bg-lime-100/70 hover:bg-lime-200/70 px-2.5 py-1 rounded-lg border border-lime-300/80 transition-colors cursor-pointer ml-1"
             >
               Play this cue
             </button>
           )}
         </div>
 
-        {/* Speed Dropdown, Volume & Fullscreen */}
+        {/* Video Stage Controls: Aspect Ratio, Safe Zones, Speed, Volume, Fullscreen */}
         <div className="flex items-center gap-2">
+          {/* Aspect Ratio Selector Pill */}
+          <div className="relative">
+            <button
+              onClick={() => setIsFormatOpen(!isFormatOpen)}
+              className="flex items-center gap-1 px-2.5 py-1 rounded-lg border border-zinc-200 bg-zinc-50 hover:bg-zinc-100 text-zinc-700 text-xs font-semibold cursor-pointer"
+              title="Change Aspect Ratio"
+            >
+              <span>{aspectRatios.find(r => r.id === aspectRatioMode)?.label || 'Fit'}</span>
+              <ChevronDown className="w-3 h-3 text-zinc-400" />
+            </button>
+
+            {isFormatOpen && (
+              <div className="absolute right-0 bottom-full mb-1 w-28 bg-white rounded-xl shadow-lg border border-zinc-200 py-1 z-50">
+                {aspectRatios.map((r) => (
+                  <button
+                    key={r.id}
+                    onClick={() => {
+                      onChangeAspectRatio(r.id);
+                      setIsFormatOpen(false);
+                    }}
+                    className={`w-full text-left px-3 py-1 text-xs font-medium hover:bg-lime-50 hover:text-zinc-950 cursor-pointer ${
+                      aspectRatioMode === r.id ? 'bg-lime-100 font-bold text-zinc-950' : 'text-zinc-600'
+                    }`}
+                  >
+                    {r.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Safe Zones Toggle */}
+          <button
+            onClick={onToggleSafeZone}
+            className={`p-1.5 rounded-lg border transition-colors cursor-pointer ${
+              showSafeZone 
+                ? 'bg-lime-100 text-lime-900 border-lime-300' 
+                : 'bg-zinc-50 hover:bg-zinc-100 text-zinc-600 border-zinc-200'
+            }`}
+            title="Toggle Reels/TikTok Safe Zone Guides"
+          >
+            {showSafeZone ? <Eye className="w-3.5 h-3.5 text-lime-700" /> : <EyeOff className="w-3.5 h-3.5 text-zinc-400" />}
+          </button>
+
           {/* Playback Speed (1x ▾) */}
           <div className="relative">
             <button
@@ -238,8 +250,8 @@ export function VideoPlayer({
                   <button
                     key={s}
                     onClick={() => handleSpeedChange(s)}
-                    className={`w-full text-center px-2 py-1 text-xs font-medium hover:bg-lime-50 hover:text-zinc-900 cursor-pointer ${
-                      playbackRate === s ? 'bg-lime-100 font-bold text-zinc-900' : 'text-zinc-600'
+                    className={`w-full text-center px-2 py-1 text-xs font-medium hover:bg-lime-50 hover:text-zinc-950 cursor-pointer ${
+                      playbackRate === s ? 'bg-lime-100 font-bold text-zinc-950' : 'text-zinc-600'
                     }`}
                   >
                     {s}x
@@ -249,7 +261,7 @@ export function VideoPlayer({
             )}
           </div>
 
-          {/* Volume */}
+          {/* Volume Toggle */}
           <button
             onClick={handleMuteToggle}
             className="p-1.5 rounded-lg hover:bg-zinc-100 text-zinc-600 transition-colors cursor-pointer"
