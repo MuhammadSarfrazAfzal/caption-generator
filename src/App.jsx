@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { Header } from './components/Header';
+import { QuickRibbon } from './components/QuickRibbon';
 import { VideoPlayer } from './components/VideoPlayer';
-import { SubtitleList } from './components/SubtitleList';
+import { CueInspector } from './components/CueInspector';
 import { StyleStudio } from './components/StyleStudio';
 import { TimelineBar } from './components/TimelineBar';
 import { SettingsModal } from './components/SettingsModal';
@@ -12,6 +13,7 @@ import { extractAudioFromVideo } from './utils/audioExtractor';
 import { generateRomanUrduCaptions } from './utils/geminiTranscriber';
 import { SAMPLE_ROMAN_URDU_CAPTIONS, createDemoVideoBlob } from './utils/sampleData';
 import { saveProjectToDb, getProjectsFromDb, deleteProjectFromDb, captureVideoThumbnail } from './utils/localDatabase';
+import { Keyboard, X, Search, Replace } from 'lucide-react';
 
 const DEFAULT_GEMINI_KEY = 'AIzaSyCDSZ60J2PVaivfcpyUf7LHdQ7R_LOcL4w';
 
@@ -36,19 +38,30 @@ export default function App() {
   const [style, setStyle] = useState(CAPCUT_PRESETS[0].style); // CapCut Viral Yellow
   const [position, setPosition] = useState({ x: 50, y: 84 });
   const [displayMode, setDisplayMode] = useState('karaoke'); // 'karaoke' or 'line'
+  const [exportFormat, setExportFormat] = useState('srt');
+
+  // History for Undo / Redo
+  const [history, setHistory] = useState([]);
+  const [future, setFuture] = useState([]);
 
   // Local Database & Projects State
   const [projectId, setProjectId] = useState(() => 'proj_' + Date.now());
-  const [projectTitle, setProjectTitle] = useState('');
+  const [projectTitle, setProjectTitle] = useState('rug-story');
   const [projectsList, setProjectsList] = useState([]);
   const [isProjectsOpen, setIsProjectsOpen] = useState(false);
   const [isDbSaved, setIsDbSaved] = useState(false);
 
-  // Generation & AI Settings
+  // Modals & Panels
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationProgress, setGenerationProgress] = useState('');
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isExportOpen, setIsExportOpen] = useState(false);
+  const [isStyleStudioOpen, setIsStyleStudioOpen] = useState(false);
+  const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
+  const [isFindReplaceOpen, setIsFindReplaceOpen] = useState(false);
+  const [findText, setFindText] = useState('');
+  const [replaceText, setReplaceText] = useState('');
+
   const [settings, setSettings] = useState(() => {
     try {
       const saved = localStorage.getItem('capscribe_settings');
@@ -81,12 +94,12 @@ export default function App() {
     refreshProjectsList();
   }, [refreshProjectsList]);
 
-  // Calculate active caption for current playback time
+  // Active caption
   const activeCaption = useMemo(() => {
-    return captions.find(c => currentTime >= c.start && currentTime <= c.end) || null;
+    return captions.find(c => currentTime >= c.start && currentTime <= c.end) || captions[0] || null;
   }, [captions, currentTime]);
 
-  // Auto-Save project to Local Database whenever captions, style, or position change
+  // Auto-Save project to Local Database
   const autoSaveTimerRef = useRef(null);
   const saveCurrentToDb = useCallback(async () => {
     if (!videoSrc && captions.length === 0) return;
@@ -99,7 +112,7 @@ export default function App() {
 
       const projectRecord = {
         id: projectId,
-        title: projectTitle || fileName || 'Roman Urdu Caption Project',
+        title: projectTitle || fileName || 'rug-story',
         fileName: fileName || 'video.mp4',
         filePath: filePath || '',
         duration: duration || 0,
@@ -118,7 +131,7 @@ export default function App() {
     } catch (err) {
       console.error('Auto-save error:', err);
     }
-  }, [projectId, projectTitle, fileName, duration, aspectRatioMode, captions, style, position, displayMode, videoSrc, refreshProjectsList]);
+  }, [projectId, projectTitle, fileName, filePath, duration, aspectRatioMode, captions, style, position, displayMode, videoSrc, refreshProjectsList]);
 
   // Debounced auto-save trigger
   useEffect(() => {
@@ -142,10 +155,7 @@ export default function App() {
     const video = videoRef.current;
     if (!video) return;
 
-    const handleTimeUpdate = () => {
-      setCurrentTime(video.currentTime);
-    };
-
+    const handleTimeUpdate = () => setCurrentTime(video.currentTime);
     const handleLoadedMetadata = () => {
       setDuration(video.duration || 0);
       const w = video.videoWidth;
@@ -175,7 +185,7 @@ export default function App() {
     };
   }, [videoSrc]);
 
-  // Global Keyboard Shortcuts (Space for Play/Pause)
+  // Keyboard Shortcuts
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (['INPUT', 'TEXTAREA'].includes(e.target.tagName)) return;
@@ -189,14 +199,43 @@ export default function App() {
       } else if (e.code === 'ArrowRight') {
         e.preventDefault();
         handleSeek(Math.min(duration, currentTime + 3));
+      } else if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+        e.preventDefault();
+        handleUndo();
+      } else if ((e.ctrlKey || e.metaKey) && e.key === 'y') {
+        e.preventDefault();
+        handleRedo();
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isPlaying, currentTime, duration]);
+  }, [isPlaying, currentTime, duration, history, future]);
 
-  // Crash-proof File loading handler
+  // Undo / Redo implementation
+  const updateCaptionsWithHistory = (newCaptions) => {
+    setHistory(h => [...h.slice(-25), captions]);
+    setFuture([]);
+    setCaptions(newCaptions);
+  };
+
+  const handleUndo = () => {
+    if (history.length === 0) return;
+    const previous = history[history.length - 1];
+    setHistory(h => h.slice(0, -1));
+    setFuture(f => [captions, ...f]);
+    setCaptions(previous);
+  };
+
+  const handleRedo = () => {
+    if (future.length === 0) return;
+    const next = future[0];
+    setFuture(f => f.slice(1));
+    setHistory(h => [...h, captions]);
+    setCaptions(next);
+  };
+
+  // Video loading
   const handleOpenVideo = async () => {
     try {
       if (window.electronAPI?.openVideoDialog) {
@@ -215,7 +254,7 @@ export default function App() {
           setFilePath(result.filePath || '');
           setVideoFile(blob);
           setProjectId('proj_' + Date.now());
-          setProjectTitle(result.fileName);
+          setProjectTitle(result.fileName.replace(/\.[^/.]+$/, ''));
           return;
         }
       }
@@ -234,7 +273,7 @@ export default function App() {
       setVideoFile(file);
       setFileName(file.name);
       setProjectId('proj_' + Date.now());
-      setProjectTitle(file.name);
+      setProjectTitle(file.name.replace(/\.[^/.]+$/, ''));
     }
   };
 
@@ -247,11 +286,11 @@ export default function App() {
       setVideoFile(file);
       setFileName(file.name);
       setProjectId('proj_' + Date.now());
-      setProjectTitle(file.name);
+      setProjectTitle(file.name.replace(/\.[^/.]+$/, ''));
     }
   };
 
-  // Load interactive demo video & sample captions
+  // Demo Video Loader
   const handleLoadDemo = async () => {
     try {
       setIsGenerating(true);
@@ -263,8 +302,8 @@ export default function App() {
       const name = 'Pakistani_Vlog_RomanUrdu_Demo.mp4';
       setFileName(name);
       setProjectId('demo_' + Date.now());
-      setProjectTitle('Pakistani Roman Urdu Demo');
-      setCaptions(SAMPLE_ROMAN_URDU_CAPTIONS);
+      setProjectTitle('rug-story');
+      updateCaptionsWithHistory(SAMPLE_ROMAN_URDU_CAPTIONS);
       setAspectRatioMode('9:16');
       setShowSafeZone(true);
       setIsGenerating(false);
@@ -276,7 +315,6 @@ export default function App() {
     }
   };
 
-  // Load Project from Database
   const handleLoadProject = (proj) => {
     setProjectId(proj.id);
     setProjectTitle(proj.title || proj.fileName);
@@ -290,31 +328,11 @@ export default function App() {
     if (proj.duration) setDuration(proj.duration);
   };
 
-  // Delete Project from Database
   const handleDeleteProject = async (id) => {
     await deleteProjectFromDb(id);
     refreshProjectsList();
-    if (projectId === id) {
-      handleNewProject();
-    }
   };
 
-  // Start fresh project
-  const handleNewProject = () => {
-    setProjectId('proj_' + Date.now());
-    setProjectTitle('');
-    setFileName('');
-    setFilePath('');
-    setVideoSrc(null);
-    setVideoFile(null);
-    setCaptions([]);
-    setStyle(CAPCUT_PRESETS[0].style);
-    setPosition({ x: 50, y: 84 });
-    setDuration(0);
-    setCurrentTime(0);
-  };
-
-  // Playback control
   const handlePlayPause = () => {
     if (!videoRef.current) return;
     if (videoRef.current.paused) {
@@ -339,44 +357,56 @@ export default function App() {
   };
 
   // Caption Editing Handlers
-  const handleUpdateCaption = (id, newText) => {
-    setCaptions(prev => prev.map(c => {
+  const handleUpdateCaption = (id, updateOrText) => {
+    updateCaptionsWithHistory(captions.map(c => {
       if (c.id === id) {
-        const words = newText.split(/\s+/).filter(Boolean);
-        const wordDur = words.length > 0 ? (c.end - c.start) / words.length : 0.5;
-        const newWords = words.map((w, i) => ({
-          word: w,
-          start: Number((c.start + i * wordDur).toFixed(2)),
-          end: Number((c.start + (i + 1) * wordDur).toFixed(2))
-        }));
-        return { ...c, text: newText, words: newWords };
+        if (typeof updateOrText === 'string') {
+          const words = updateOrText.split(/\s+/).filter(Boolean);
+          const wordDur = words.length > 0 ? (c.end - c.start) / words.length : 0.5;
+          const newWords = words.map((w, i) => ({
+            word: w,
+            start: Number((c.start + i * wordDur).toFixed(2)),
+            end: Number((c.start + (i + 1) * wordDur).toFixed(2))
+          }));
+          return { ...c, text: updateOrText, words: newWords };
+        } else {
+          const updated = { ...c, ...updateOrText };
+          if (updateOrText.text && !updateOrText.words) {
+            const words = updateOrText.text.split(/\s+/).filter(Boolean);
+            const wordDur = words.length > 0 ? (updated.end - updated.start) / words.length : 0.5;
+            updated.words = words.map((w, i) => ({
+              word: w,
+              start: Number((updated.start + i * wordDur).toFixed(2)),
+              end: Number((updated.start + (i + 1) * wordDur).toFixed(2))
+            }));
+          }
+          return updated;
+        }
       }
       return c;
     }));
   };
 
   const handleDeleteCaption = (id) => {
-    setCaptions(prev => prev.filter(c => c.id !== id));
+    updateCaptionsWithHistory(captions.filter(c => c.id !== id));
   };
 
   const handleAddCaptionAtCurrent = () => {
     const start = Number(currentTime.toFixed(2));
     const end = Number(Math.min(duration || 100, currentTime + 2.5).toFixed(2));
-    const newId = Date.now();
     const newCap = {
-      id: newId,
+      id: Date.now(),
       start,
       end,
-      text: "Naya Roman Urdu caption likhein",
+      text: "Naya Roman Urdu caption",
       words: [
-        { word: "Naya", start: start, end: start + 0.6 },
-        { word: "Roman", start: start + 0.6, end: start + 1.2 },
-        { word: "Urdu", start: start + 1.2, end: start + 1.8 },
-        { word: "caption", start: start + 1.8, end: start + 2.5 }
+        { word: "Naya", start: start, end: start + 0.8 },
+        { word: "Roman", start: start + 0.8, end: start + 1.6 },
+        { word: "Urdu", start: start + 1.6, end: end }
       ]
     };
 
-    setCaptions(prev => [...prev, newCap].sort((a, b) => a.start - b.start));
+    updateCaptionsWithHistory([...captions, newCap].sort((a, b) => a.start - b.start));
   };
 
   const handleSplitCaption = (id) => {
@@ -397,10 +427,48 @@ export default function App() {
       text: text2
     };
 
-    setCaptions(prev => prev.flatMap(c => c.id === id ? [cap1, cap2] : [c]));
+    updateCaptionsWithHistory(captions.flatMap(c => c.id === id ? [cap1, cap2] : [c]));
   };
 
-  // Caption Generation Trigger
+  const handleMergeCaption = (id) => {
+    const idx = captions.findIndex(c => c.id === id);
+    if (idx === -1 || idx >= captions.length - 1) return;
+    const current = captions[idx];
+    const next = captions[idx + 1];
+    const merged = {
+      ...current,
+      end: next.end,
+      text: `${current.text} ${next.text}`.trim(),
+      words: [...(current.words || []), ...(next.words || [])]
+    };
+    const nextList = [...captions];
+    nextList.splice(idx, 2, merged);
+    updateCaptionsWithHistory(nextList);
+  };
+
+  // Fix and Check (Auto format & split to 3 words)
+  const handleFixAndCheck = () => {
+    const fixed = captions.map(c => {
+      let t = (c.text || '').trim();
+      if (t.length > 0) t = t.charAt(0).toUpperCase() + t.slice(1);
+      return { ...c, text: t };
+    });
+    updateCaptionsWithHistory(fixed);
+  };
+
+  // Find & Replace Handler
+  const handleApplyFindReplace = () => {
+    if (!findText) return;
+    const regex = new RegExp(findText, 'gi');
+    const updated = captions.map(c => ({
+      ...c,
+      text: (c.text || '').replace(regex, replaceText)
+    }));
+    updateCaptionsWithHistory(updated);
+    setIsFindReplaceOpen(false);
+  };
+
+  // Gemini Caption Generation Trigger
   const handleGenerateCaptions = async () => {
     if (!videoSrc) {
       alert('Please upload a video file first.');
@@ -428,10 +496,9 @@ export default function App() {
         onProgress: (msg) => setGenerationProgress(msg)
       });
 
-      setCaptions(generated);
+      updateCaptionsWithHistory(generated);
       setIsGenerating(false);
       setGenerationProgress('');
-      // Trigger instant save to local DB
       saveCurrentToDb();
     } catch (err) {
       console.error('Caption generation error:', err);
@@ -450,9 +517,9 @@ export default function App() {
     <div 
       onDragOver={(e) => e.preventDefault()}
       onDrop={handleDrop}
-      className="flex flex-col h-screen w-screen bg-[#07080b] text-zinc-100 overflow-hidden font-sans select-none"
+      className="h-screen w-screen p-4 md:p-6 flex items-center justify-center font-sans select-none overflow-hidden"
     >
-      {/* Hidden File Input for browser / fallback */}
+      {/* Hidden File Input */}
       <input
         type="file"
         ref={fileInputRef}
@@ -461,90 +528,210 @@ export default function App() {
         className="hidden"
       />
 
-      {/* CapCut Top App Bar with Projects Database Button */}
-      <Header
-        fileName={fileName}
-        aspectRatio={aspectRatioText}
-        onOpenVideo={handleOpenVideo}
-        onLoadDemo={handleLoadDemo}
-        onOpenProjects={() => setIsProjectsOpen(true)}
-        projectCount={projectsList.length}
-        isSaved={isDbSaved}
-        onOpenSettings={() => setIsSettingsOpen(true)}
-        onOpenExport={() => setIsExportOpen(true)}
-        onGenerateCaptions={handleGenerateCaptions}
-        isGenerating={isGenerating}
-        hasVideo={Boolean(videoSrc)}
-        hasCaptions={captions.length > 0}
-        apiKeySet={Boolean(settings.apiKey)}
-      />
-
-      {/* Main 3-Column Studio Workspace */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* Left: Roman Urdu Captions Timeline List */}
-        <SubtitleList
-          captions={captions}
-          activeCaptionId={activeCaption?.id}
-          currentTime={currentTime}
-          onUpdateCaption={handleUpdateCaption}
-          onDeleteCaption={handleDeleteCaption}
-          onAddCaption={handleAddCaptionAtCurrent}
-          onSplitCaption={handleSplitCaption}
-          onSeek={handleSeek}
+      {/* Main App Container Card (Exact match to reference image aesthetic!) */}
+      <div className="w-full h-full max-w-[1440px] app-window-card rounded-[28px] flex flex-col overflow-hidden relative shadow-2xl">
+        
+        {/* Top Header Bar */}
+        <Header
+          fileName={fileName}
+          projectTitle={projectTitle}
+          onUpdateTitle={setProjectTitle}
+          captionCount={captions.length}
+          onOpenVideo={handleOpenVideo}
+          onLoadDemo={handleLoadDemo}
+          onOpenProjects={() => setIsProjectsOpen(true)}
+          onOpenSettings={() => setIsSettingsOpen(true)}
+          onOpenExport={() => setIsExportOpen(true)}
           onGenerateCaptions={handleGenerateCaptions}
           isGenerating={isGenerating}
-          generationProgress={generationProgress}
+          onToggleStyleStudio={() => setIsStyleStudioOpen(!isStyleStudioOpen)}
+          isStyleStudioOpen={isStyleStudioOpen}
+          exportFormat={exportFormat}
+          onChangeExportFormat={setExportFormat}
+          onUndo={handleUndo}
+          onRedo={handleRedo}
+          canUndo={history.length > 0}
+          canRedo={future.length > 0}
         />
 
-        {/* Center: Video Viewport & On-Canvas Draggable Overlay */}
-        <VideoPlayer
-          videoSrc={videoSrc}
-          videoRef={videoRef}
-          captions={captions}
-          activeCaption={activeCaption}
+        {/* Quick Action Ribbon Bar (Timing, Fix & check, Find & replace, Export, Burn, Shortcuts) */}
+        <QuickRibbon
+          onOpenExport={() => setIsExportOpen(true)}
+          onBurnIntoVideo={() => setIsExportOpen(true)}
+          onOpenStyleStudio={() => setIsStyleStudioOpen(true)}
+          onFixAndCheck={handleFixAndCheck}
+          onFindAndReplace={() => setIsFindReplaceOpen(true)}
+          onOpenShortcuts={() => setIsShortcutsOpen(true)}
+          onOpenTiming={() => {}}
+          isSaved={isDbSaved}
+        />
+
+        {/* Middle Stage: 2-Column Layout (Video Player on Left, Cue Inspector on Right) */}
+        <div className="flex-1 flex overflow-hidden relative">
+          
+          {/* Left: Video Viewport Stage */}
+          <VideoPlayer
+            videoSrc={videoSrc}
+            videoRef={videoRef}
+            captions={captions}
+            activeCaption={activeCaption}
+            currentTime={currentTime}
+            duration={duration}
+            isPlaying={isPlaying}
+            onPlayPause={handlePlayPause}
+            onSeek={handleSeek}
+            onVolumeChange={handleVolumeChange}
+            volume={volume}
+            style={style}
+            onUpdateStyle={(updated) => setStyle(prev => ({ ...prev, ...updated }))}
+            position={position}
+            onPositionChange={setPosition}
+            displayMode={displayMode}
+            onUploadClick={handleOpenVideo}
+            showSafeZone={showSafeZone}
+            onToggleSafeZone={() => setShowSafeZone(!showSafeZone)}
+            aspectRatioMode={aspectRatioMode}
+            onChangeAspectRatio={setAspectRatioMode}
+          />
+
+          {/* Right: Cue Inspector & Precision Editor Card */}
+          <CueInspector
+            captions={captions}
+            activeCaption={activeCaption}
+            activeCaptionId={activeCaption?.id}
+            currentTime={currentTime}
+            onUpdateCaption={handleUpdateCaption}
+            onDeleteCaption={handleDeleteCaption}
+            onAddCaption={handleAddCaptionAtCurrent}
+            onSplitCaption={handleSplitCaption}
+            onMergeCaption={handleMergeCaption}
+            onSeek={handleSeek}
+            style={style}
+            onUpdateStyle={(updated) => setStyle(prev => ({ ...prev, ...updated }))}
+            onOpenStyleStudio={() => setIsStyleStudioOpen(true)}
+          />
+
+          {/* Optional Slide-out Style Studio Drawer */}
+          {isStyleStudioOpen && (
+            <div className="absolute top-0 right-0 bottom-0 z-30 shadow-2xl animate-in slide-in-from-right duration-200">
+              <StyleStudio
+                style={style}
+                onUpdateStyle={(updated) => setStyle(prev => ({ ...prev, ...updated }))}
+                position={position}
+                onUpdatePosition={setPosition}
+                displayMode={displayMode}
+                onChangeDisplayMode={setDisplayMode}
+                onClose={() => setIsStyleStudioOpen(false)}
+              />
+            </div>
+          )}
+        </div>
+
+        {/* Bottom: Waveform Timeline Bar (Ruler, Gray Peaks, Lime Active Cue & Red Playhead) */}
+        <TimelineBar
           currentTime={currentTime}
           duration={duration}
           isPlaying={isPlaying}
           onPlayPause={handlePlayPause}
           onSeek={handleSeek}
-          onVolumeChange={handleVolumeChange}
-          volume={volume}
-          style={style}
-          onUpdateStyle={(updated) => setStyle(prev => ({ ...prev, ...updated }))}
-          position={position}
-          onPositionChange={setPosition}
-          displayMode={displayMode}
-          onUploadClick={handleOpenVideo}
-          showSafeZone={showSafeZone}
-          onToggleSafeZone={() => setShowSafeZone(!showSafeZone)}
-          aspectRatioMode={aspectRatioMode}
-          onChangeAspectRatio={setAspectRatioMode}
-        />
-
-        {/* Right: CapCut Style, Fonts, Effects & Position Inspector */}
-        <StyleStudio
-          style={style}
-          onUpdateStyle={(updated) => setStyle(prev => ({ ...prev, ...updated }))}
-          position={position}
-          onUpdatePosition={setPosition}
-          displayMode={displayMode}
-          onChangeDisplayMode={setDisplayMode}
+          captions={captions}
+          activeCaptionId={activeCaption?.id}
+          onUpdateCaption={handleUpdateCaption}
+          onAddCaptionAtPlayhead={handleAddCaptionAtCurrent}
         />
       </div>
 
-      {/* Bottom CapCut Multi-Track Timeline */}
-      <TimelineBar
-        currentTime={currentTime}
-        duration={duration}
-        isPlaying={isPlaying}
-        onPlayPause={handlePlayPause}
-        onSeek={handleSeek}
-        captions={captions}
-        activeCaptionId={activeCaption?.id}
-        onAddCaptionAtPlayhead={handleAddCaptionAtCurrent}
-      />
+      {/* Shortcuts Modal */}
+      {isShortcutsOpen && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-2xs flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-sm w-full p-5 shadow-2xl border border-zinc-200">
+            <div className="flex items-center justify-between pb-3 border-b border-zinc-100">
+              <div className="flex items-center gap-2 font-bold text-sm text-zinc-900">
+                <Keyboard className="w-4 h-4 text-lime-600" />
+                <span>Keyboard Shortcuts</span>
+              </div>
+              <button
+                onClick={() => setIsShortcutsOpen(false)}
+                className="p-1 rounded-lg hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="space-y-2.5 pt-3 text-xs text-zinc-600 font-medium">
+              <div className="flex justify-between items-center">
+                <span>Play / Pause</span>
+                <kbd className="px-2 py-0.5 rounded bg-zinc-100 font-mono text-zinc-800 border border-zinc-200 font-bold">Space</kbd>
+              </div>
+              <div className="flex justify-between items-center">
+                <span>Seek Back 3s</span>
+                <kbd className="px-2 py-0.5 rounded bg-zinc-100 font-mono text-zinc-800 border border-zinc-200 font-bold">← Left Arrow</kbd>
+              </div>
+              <div className="flex justify-between items-center">
+                <span>Seek Forward 3s</span>
+                <kbd className="px-2 py-0.5 rounded bg-zinc-100 font-mono text-zinc-800 border border-zinc-200 font-bold">→ Right Arrow</kbd>
+              </div>
+              <div className="flex justify-between items-center">
+                <span>Undo</span>
+                <kbd className="px-2 py-0.5 rounded bg-zinc-100 font-mono text-zinc-800 border border-zinc-200 font-bold">Ctrl + Z</kbd>
+              </div>
+              <div className="flex justify-between items-center">
+                <span>Redo</span>
+                <kbd className="px-2 py-0.5 rounded bg-zinc-100 font-mono text-zinc-800 border border-zinc-200 font-bold">Ctrl + Y</kbd>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
-      {/* Local Database Projects & History Modal */}
+      {/* Find & Replace Modal */}
+      {isFindReplaceOpen && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-2xs flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-sm w-full p-5 shadow-2xl border border-zinc-200">
+            <div className="flex items-center justify-between pb-3 border-b border-zinc-100">
+              <div className="flex items-center gap-2 font-bold text-sm text-zinc-900">
+                <Search className="w-4 h-4 text-lime-600" />
+                <span>Find & Replace</span>
+              </div>
+              <button
+                onClick={() => setIsFindReplaceOpen(false)}
+                className="p-1 rounded-lg hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="space-y-3 pt-3">
+              <div>
+                <label className="text-xs font-semibold text-zinc-600 block mb-1">Find text</label>
+                <input
+                  type="text"
+                  value={findText}
+                  onChange={(e) => setFindText(e.target.value)}
+                  placeholder="e.g. ap"
+                  className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-3 py-1.5 text-xs text-zinc-900 focus:outline-none focus:border-lime-500"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-zinc-600 block mb-1">Replace with</label>
+                <input
+                  type="text"
+                  value={replaceText}
+                  onChange={(e) => setReplaceText(e.target.value)}
+                  placeholder="e.g. aap"
+                  className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-3 py-1.5 text-xs text-zinc-900 focus:outline-none focus:border-lime-500"
+                />
+              </div>
+              <button
+                onClick={handleApplyFindReplace}
+                className="w-full py-2 rounded-xl bg-[#bbf421] hover:bg-[#a3e635] text-zinc-950 font-bold text-xs tracking-tight shadow-sm cursor-pointer mt-2"
+              >
+                Replace All
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Projects Modal */}
       <ProjectsModal
         isOpen={isProjectsOpen}
         onClose={() => setIsProjectsOpen(false)}
@@ -552,7 +739,12 @@ export default function App() {
         activeProjectId={projectId}
         onLoadProject={handleLoadProject}
         onDeleteProject={handleDeleteProject}
-        onNewProject={handleNewProject}
+        onNewProject={() => {
+          setProjectId('proj_' + Date.now());
+          setProjectTitle('rug-story');
+          setCaptions([]);
+          setVideoSrc(null);
+        }}
       />
 
       {/* Settings Modal */}
@@ -572,7 +764,7 @@ export default function App() {
         position={position}
         displayMode={displayMode}
         videoRef={videoRef}
-        fileName={fileName || 'video'}
+        fileName={projectTitle || fileName || 'rug-story'}
         filePath={filePath}
       />
     </div>

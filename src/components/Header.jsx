@@ -1,173 +1,242 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
-  Sparkles, 
   FolderOpen, 
-  Settings, 
+  RotateCcw, 
+  RotateCw, 
+  Sparkles, 
   Download, 
-  Video, 
-  PlayCircle,
-  Database,
+  ChevronDown,
+  X,
   Minus,
   Square,
-  X,
-  Check
+  Languages,
+  Check,
+  Database,
+  Palette,
+  Settings
 } from 'lucide-react';
 
 export function Header({
   fileName,
-  aspectRatio,
+  projectTitle = 'rug-story',
+  onUpdateTitle,
+  captionCount = 0,
   onOpenVideo,
   onLoadDemo,
   onOpenProjects,
-  projectCount = 0,
-  isSaved,
   onOpenSettings,
   onOpenExport,
   onGenerateCaptions,
   isGenerating,
-  hasVideo,
-  hasCaptions,
-  apiKeySet
+  onToggleStyleStudio,
+  isStyleStudioOpen,
+  exportFormat = 'srt',
+  onChangeExportFormat,
+  onUndo,
+  onRedo,
+  canUndo = false,
+  canRedo = false
 }) {
-  const isElectron = window.electronAPI?.isElectron;
+  const [isFormatOpen, setIsFormatOpen] = useState(false);
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [tempTitle, setTempTitle] = useState('');
+
+  const displayTitle = projectTitle || (fileName ? fileName.replace(/\.[^/.]+$/, '') : 'rug-story');
+
+  const handleTitleSubmit = () => {
+    setIsEditingTitle(false);
+    if (tempTitle.trim() && onUpdateTitle) {
+      onUpdateTitle(tempTitle.trim());
+    }
+  };
+
+  const formats = [
+    { id: 'srt', label: '.srt' },
+    { id: 'vtt', label: '.vtt' },
+    { id: 'ass', label: '.ass' },
+    { id: 'json', label: '.json' },
+    { id: 'mp4', label: '.mp4 (Burned)' }
+  ];
 
   const handleMinimize = () => window.electronAPI?.minimizeWindow?.();
   const handleMaximize = () => window.electronAPI?.maximizeWindow?.();
   const handleClose = () => window.electronAPI?.closeWindow?.();
 
   return (
-    <header className="h-14 bg-[#101219] border-b border-[#1f2230] flex items-center justify-between px-4 z-30 select-none">
-      {/* Brand & Project Info */}
+    <header className="h-16 px-6 bg-white border-b border-zinc-200/80 flex items-center justify-between select-none rounded-t-[26px]">
+      {/* Left: Project Title & Cues Subtitle */}
       <div className="flex items-center gap-3">
-        <div className="flex items-center gap-2 px-2.5 py-1 rounded-lg bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-500/30">
-          <Sparkles className="w-4 h-4 text-cyan-400 animate-pulse" />
-          <span className="font-extrabold tracking-wider text-sm bg-gradient-to-r from-cyan-400 via-teal-300 to-yellow-300 bg-clip-text text-transparent">
-            CAPSCRIBE
-          </span>
-          <span className="text-[10px] uppercase font-bold tracking-widest px-1.5 py-0.5 rounded bg-cyan-950 text-cyan-400 border border-cyan-800">
-            Roman Urdu
-          </span>
-        </div>
-
-        {/* Database Projects Button */}
-        <button
-          onClick={onOpenProjects}
-          className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-[#181c28] hover:bg-[#222738] text-zinc-300 border border-[#2b3042] transition-all cursor-pointer"
-          title="Open Local Database & Saved Projects"
-        >
-          <Database className="w-3.5 h-3.5 text-cyan-400" />
-          <span>Projects</span>
-          {projectCount > 0 && (
-            <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-cyan-950 text-cyan-400 font-mono border border-cyan-800">
-              {projectCount}
-            </span>
+        <div>
+          {isEditingTitle ? (
+            <input
+              type="text"
+              value={tempTitle}
+              autoFocus
+              onChange={(e) => setTempTitle(e.target.value)}
+              onBlur={handleTitleSubmit}
+              onKeyDown={(e) => e.key === 'Enter' && handleTitleSubmit()}
+              className="text-sm font-bold text-zinc-900 bg-zinc-100 px-2 py-0.5 rounded outline-none border border-lime-500 font-sans"
+            />
+          ) : (
+            <h1 
+              onClick={() => { setTempTitle(displayTitle); setIsEditingTitle(true); }}
+              className="text-[15px] font-bold text-zinc-900 tracking-tight cursor-pointer hover:text-zinc-600 transition-colors"
+              title="Click to rename project"
+            >
+              {displayTitle}
+            </h1>
           )}
+          <p className="text-xs text-zinc-400 font-medium tracking-tight">
+            {captionCount} cues · SubRip (.{exportFormat || 'srt'})
+          </p>
+        </div>
+      </div>
+
+      {/* Center/Right: Action Icons, Format Pill, and Download Button */}
+      <div className="flex items-center gap-2.5">
+        {/* Undo / Redo */}
+        <button
+          onClick={onUndo}
+          disabled={!canUndo}
+          className={`p-1.5 rounded-lg transition-colors ${
+            canUndo ? 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 cursor-pointer' : 'text-zinc-300 cursor-not-allowed'
+          }`}
+          title="Undo (Ctrl+Z)"
+        >
+          <RotateCcw className="w-4 h-4" />
         </button>
 
-        {fileName && (
-          <div className="flex items-center gap-2 pl-3 border-l border-[#272a38]">
-            <Video className="w-3.5 h-3.5 text-zinc-400" />
-            <span className="text-xs text-zinc-300 font-medium max-w-[180px] truncate" title={fileName}>
-              {fileName}
-            </span>
-            {aspectRatio && (
-              <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#1f2230] text-zinc-400 font-mono">
-                {aspectRatio}
-              </span>
-            )}
-            {/* Auto-saved badge */}
-            <span className="flex items-center gap-1 text-[10px] text-emerald-400/90 font-mono">
-              <Check className="w-3 h-3 text-emerald-400" />
-              <span>Saved</span>
-            </span>
+        <button
+          onClick={onRedo}
+          disabled={!canRedo}
+          className={`p-1.5 rounded-lg transition-colors ${
+            canRedo ? 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 cursor-pointer' : 'text-zinc-300 cursor-not-allowed'
+          }`}
+          title="Redo (Ctrl+Y)"
+        >
+          <RotateCw className="w-4 h-4" />
+        </button>
+
+        {/* Upload Video / File */}
+        <button
+          onClick={onOpenVideo}
+          className="p-1.5 rounded-lg text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 transition-colors cursor-pointer"
+          title="Open Video File"
+        >
+          <FolderOpen className="w-4 h-4" />
+        </button>
+
+        {/* AI Roman Urdu Transcription */}
+        <button
+          onClick={onGenerateCaptions}
+          disabled={isGenerating}
+          className={`p-1.5 rounded-lg transition-colors ${
+            isGenerating ? 'text-lime-600 animate-spin bg-lime-50' : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100'
+          } cursor-pointer`}
+          title="Generate Roman Urdu Captions with Gemini AI"
+        >
+          <Languages className="w-4 h-4" />
+        </button>
+
+        {/* Style Studio Toggle */}
+        <button
+          onClick={onToggleStyleStudio}
+          className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+            isStyleStudioOpen ? 'bg-zinc-100 text-zinc-900 font-bold' : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100'
+          }`}
+          title="Toggle 16 CapCut Style Presets & Studio"
+        >
+          <Palette className="w-4 h-4" />
+        </button>
+
+        {/* Projects DB */}
+        <button
+          onClick={onOpenProjects}
+          className="p-1.5 rounded-lg text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 transition-colors cursor-pointer"
+          title="Saved Projects Database"
+        >
+          <Database className="w-4 h-4" />
+        </button>
+
+        {/* Settings */}
+        <button
+          onClick={onOpenSettings}
+          className="p-1.5 rounded-lg text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 transition-colors cursor-pointer"
+          title="Settings (API Key & Preferences)"
+        >
+          <Settings className="w-4 h-4" />
+        </button>
+
+        {/* Divider */}
+        <div className="h-5 w-px bg-zinc-200 mx-1" />
+
+        {/* Format Selector Dropdown Pill (.srt) */}
+        <div className="relative">
+          <button
+            onClick={() => setIsFormatOpen(!isFormatOpen)}
+            className="flex items-center gap-1 px-3 py-1.5 rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-700 text-xs font-semibold shadow-xs cursor-pointer"
+          >
+            <span>.{exportFormat}</span>
+            <ChevronDown className="w-3.5 h-3.5 text-zinc-400" />
+          </button>
+
+          {isFormatOpen && (
+            <div className="absolute right-0 mt-1 w-32 bg-white rounded-xl shadow-xl border border-zinc-200 py-1 z-50 animate-in fade-in zoom-in-95 duration-100">
+              {formats.map((f) => (
+                <button
+                  key={f.id}
+                  onClick={() => {
+                    onChangeExportFormat?.(f.id);
+                    setIsFormatOpen(false);
+                  }}
+                  className={`w-full text-left px-3 py-1.5 text-xs font-medium flex items-center justify-between hover:bg-lime-50 hover:text-zinc-900 cursor-pointer ${
+                    exportFormat === f.id ? 'bg-lime-100/60 text-zinc-900 font-bold' : 'text-zinc-600'
+                  }`}
+                >
+                  <span>{f.label}</span>
+                  {exportFormat === f.id && <Check className="w-3 h-3 text-lime-600" />}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Primary CTA: Download Button (Vibrant Lime Green as in reference!) */}
+        <button
+          onClick={onOpenExport}
+          className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-[#bbf421] hover:bg-[#a3e635] text-zinc-950 font-bold text-xs tracking-tight shadow-sm hover:shadow transition-all cursor-pointer active:scale-95"
+        >
+          <Download className="w-3.5 h-3.5 stroke-[2.5]" />
+          <span>Download</span>
+        </button>
+
+        {/* Window controls if Electron */}
+        {window.electronAPI?.isElectron && (
+          <div className="flex items-center gap-1 ml-2 pl-2 border-l border-zinc-200">
+            <button
+              onClick={handleMinimize}
+              className="p-1 rounded hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700"
+              title="Minimize"
+            >
+              <Minus className="w-3 h-3" />
+            </button>
+            <button
+              onClick={handleMaximize}
+              className="p-1 rounded hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700"
+              title="Maximize"
+            >
+              <Square className="w-2.5 h-2.5" />
+            </button>
+            <button
+              onClick={handleClose}
+              className="p-1 rounded hover:bg-red-50 hover:text-red-500 text-zinc-400"
+              title="Close"
+            >
+              <X className="w-3 h-3" />
+            </button>
           </div>
         )}
       </div>
-
-      {/* Main Actions */}
-      <div className="flex items-center gap-2">
-        <button
-          onClick={onOpenVideo}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold bg-[#1d212d] hover:bg-[#272c3d] text-zinc-200 border border-[#31364a] transition-all cursor-pointer"
-        >
-          <FolderOpen className="w-3.5 h-3.5 text-cyan-400" />
-          <span>Upload Video</span>
-        </button>
-
-        <button
-          onClick={onLoadDemo}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold bg-[#181c28] hover:bg-[#222738] text-zinc-300 border border-[#2c3144] transition-all cursor-pointer"
-          title="Load Pakistani Roman Urdu Demo Video & Captions"
-        >
-          <PlayCircle className="w-3.5 h-3.5 text-yellow-400" />
-          <span>Try Demo</span>
-        </button>
-
-        {hasVideo && (
-          <button
-            onClick={onGenerateCaptions}
-            disabled={isGenerating}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
-              isGenerating
-                ? 'bg-cyan-950 text-cyan-400 border border-cyan-700 opacity-80 cursor-wait'
-                : 'bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-black shadow-lg shadow-cyan-500/20'
-            }`}
-          >
-            <Sparkles className={`w-3.5 h-3.5 ${isGenerating ? 'animate-spin' : ''}`} />
-            <span>{isGenerating ? 'Generating Roman Urdu...' : 'Generate Captions'}</span>
-          </button>
-        )}
-
-        <button
-          onClick={onOpenExport}
-          disabled={!hasCaptions}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold border transition-all cursor-pointer ${
-            hasCaptions
-              ? 'bg-[#182a24] hover:bg-[#1e382f] text-emerald-300 border-emerald-600/40 shadow-sm'
-              : 'bg-[#161821] text-zinc-600 border-[#222634] cursor-not-allowed opacity-50'
-          }`}
-        >
-          <Download className="w-3.5 h-3.5 text-emerald-400" />
-          <span>Export</span>
-        </button>
-
-        <button
-          onClick={onOpenSettings}
-          className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium border transition-all cursor-pointer ${
-            apiKeySet
-              ? 'bg-[#1a1d28] hover:bg-[#25293a] text-zinc-300 border-[#2f3448]'
-              : 'bg-amber-950/40 hover:bg-amber-900/50 text-amber-300 border-amber-600/50 animate-pulse'
-          }`}
-          title={apiKeySet ? 'Settings (Gemini Key Ready)' : 'Setup Gemini API Key'}
-        >
-          <Settings className="w-3.5 h-3.5" />
-          <span>Settings</span>
-        </button>
-      </div>
-
-      {/* Electron Window Controls */}
-      {isElectron && (
-        <div className="flex items-center gap-1 pl-4 ml-2 border-l border-[#272a38]">
-          <button 
-            onClick={handleMinimize}
-            className="w-7 h-7 flex items-center justify-center rounded hover:bg-[#222634] text-zinc-400 hover:text-white transition-colors"
-          >
-            <Minus className="w-3.5 h-3.5" />
-          </button>
-          <button 
-            onClick={handleMaximize}
-            className="w-7 h-7 flex items-center justify-center rounded hover:bg-[#222634] text-zinc-400 hover:text-white transition-colors"
-          >
-            <Square className="w-3 h-3" />
-          </button>
-          <button 
-            onClick={handleClose}
-            className="w-7 h-7 flex items-center justify-center rounded hover:bg-red-600/80 text-zinc-400 hover:text-white transition-colors"
-          >
-            <X className="w-3.5 h-3.5" />
-          </button>
-        </div>
-      )}
     </header>
   );
 }

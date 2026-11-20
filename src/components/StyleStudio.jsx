@@ -8,7 +8,8 @@ import {
   Check, 
   RotateCcw,
   Sliders,
-  Flame
+  Flame,
+  X
 } from 'lucide-react';
 import { CAPCUT_PRESETS, POSITION_PRESETS, FONT_OPTIONS } from '../utils/stylePresets';
 
@@ -18,7 +19,8 @@ export function StyleStudio({
   position,
   onUpdatePosition,
   displayMode,
-  onChangeDisplayMode
+  onChangeDisplayMode,
+  onClose
 }) {
   const [activeTab, setActiveTab] = useState('presets'); // 'presets' | 'font' | 'effects' | 'box' | 'position'
 
@@ -39,9 +41,26 @@ export function StyleStudio({
   ];
 
   return (
-    <aside className="w-84 bg-[#101218] border-l border-[#1f2230] flex flex-col h-full z-10 select-none">
+    <aside className="w-80 bg-white border-l border-zinc-200/90 flex flex-col h-full z-20 select-none shadow-lg">
+      {/* Studio Header */}
+      <div className="p-3 border-b border-zinc-200/80 flex items-center justify-between">
+        <div className="flex items-center gap-1.5 font-bold text-xs text-zinc-900">
+          <Palette className="w-4 h-4 text-lime-600" />
+          <span>Style Studio</span>
+        </div>
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="p-1 rounded-lg hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700 cursor-pointer"
+            title="Close Style Studio"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        )}
+      </div>
+
       {/* Panel Tab Navigation */}
-      <div className="flex border-b border-[#1f2230] bg-[#12141c]">
+      <div className="flex border-b border-zinc-200 bg-zinc-50/70">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -49,13 +68,13 @@ export function StyleStudio({
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex-1 py-3 flex flex-col items-center gap-1 text-[10px] font-semibold tracking-wider transition-all cursor-pointer ${
+              className={`flex-1 py-2.5 flex flex-col items-center gap-1 text-[10px] font-semibold tracking-wider transition-all cursor-pointer ${
                 isActive
-                  ? 'text-cyan-400 border-b-2 border-cyan-400 bg-cyan-950/20'
-                  : 'text-zinc-500 hover:text-zinc-300'
+                  ? 'text-zinc-950 border-b-2 border-lime-500 bg-white shadow-2xs font-bold'
+                  : 'text-zinc-400 hover:text-zinc-700'
               }`}
             >
-              <Icon className="w-3.5 h-3.5" />
+              <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-lime-600' : ''}`} />
               <span>{tab.label}</span>
             </button>
           );
@@ -67,34 +86,34 @@ export function StyleStudio({
         {/* PRESETS TAB */}
         {activeTab === 'presets' && (
           <div className="space-y-3">
-            <div className="flex items-center gap-1.5 text-xs font-bold text-zinc-300">
-              <Flame className="w-4 h-4 text-amber-400" />
-              <span>CapCut Viral Presets</span>
+            <div className="flex items-center gap-1.5 text-xs font-bold text-zinc-800">
+              <Flame className="w-4 h-4 text-lime-600" />
+              <span>16 Viral CapCut Presets</span>
             </div>
             <p className="text-[11px] text-zinc-500">
-              Instant 1-click styling matching popular TikTok and Instagram Reels formats.
+              1-click styles matching popular TikTok, Shorts, and Reels aesthetics.
             </p>
 
-            <div className="grid grid-cols-1 gap-2.5 pt-1">
+            <div className="grid grid-cols-1 gap-2 pt-1">
               {CAPCUT_PRESETS.map((preset) => (
                 <div
                   key={preset.id}
                   onClick={() => handleApplyPreset(preset)}
-                  className="p-3 rounded-xl bg-[#151722] hover:bg-[#1a1d2c] border border-[#232636] hover:border-cyan-500/50 cursor-pointer transition-all group flex flex-col gap-1.5"
+                  className="p-2.5 rounded-xl bg-white hover:bg-lime-50/40 border border-zinc-200 hover:border-lime-500 cursor-pointer transition-all group flex flex-col gap-1.5 shadow-2xs"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-zinc-200 group-hover:text-cyan-300 transition-colors">
+                    <span className="text-xs font-bold text-zinc-800 group-hover:text-lime-700 transition-colors">
                       {preset.name}
                     </span>
-                    <span className="text-[10px] text-zinc-500 font-mono">Select</span>
+                    <span className="text-[10px] text-zinc-400 font-mono">Apply</span>
                   </div>
 
                   {/* Preset Preview Box */}
-                  <div className="h-10 rounded-lg bg-black/60 flex items-center justify-center overflow-hidden border border-[#252838]">
+                  <div className="h-9 rounded-lg bg-black flex items-center justify-center overflow-hidden border border-zinc-900">
                     <span
                       style={{
                         fontFamily: preset.style.fontFamily,
-                        fontSize: '15px',
+                        fontSize: '14px',
                         fontWeight: preset.style.fontWeight,
                         color: preset.style.color,
                         textTransform: preset.style.textTransform,
@@ -119,13 +138,13 @@ export function StyleStudio({
         {activeTab === 'font' && (
           <div className="space-y-4">
             <div>
-              <label className="text-xs font-semibold text-zinc-300 block mb-1.5">
+              <label className="text-xs font-semibold text-zinc-700 block mb-1">
                 Font Family
               </label>
               <select
                 value={style.fontFamily}
                 onChange={(e) => onUpdateStyle({ fontFamily: e.target.value })}
-                className="w-full bg-[#151722] border border-[#262a3a] rounded-lg px-2.5 py-1.5 text-xs text-zinc-200 focus:outline-none focus:border-cyan-500"
+                className="w-full bg-white border border-zinc-200 rounded-lg px-2.5 py-1.5 text-xs text-zinc-800 focus:outline-none focus:border-lime-500 shadow-2xs"
               >
                 {FONT_OPTIONS.map((f) => (
                   <option key={f.value} value={f.value}>
@@ -137,9 +156,9 @@ export function StyleStudio({
 
             {/* Font Size */}
             <div>
-              <div className="flex justify-between text-xs font-medium text-zinc-300 mb-1">
+              <div className="flex justify-between text-xs font-medium text-zinc-700 mb-1">
                 <span>Font Size</span>
-                <span className="font-mono text-cyan-400">{style.fontSize}px</span>
+                <span className="font-mono text-lime-700 font-bold">{style.fontSize}px</span>
               </div>
               <input
                 type="range"
@@ -153,22 +172,22 @@ export function StyleStudio({
 
             {/* Text Transform */}
             <div>
-              <label className="text-xs font-semibold text-zinc-300 block mb-1.5">
+              <label className="text-xs font-semibold text-zinc-700 block mb-1">
                 Capitalization
               </label>
               <div className="grid grid-cols-3 gap-1.5">
                 {[
                   { id: 'uppercase', label: 'ALL CAPS' },
-                  { id: 'none', label: 'As Spoken' },
+                  { id: 'none', label: 'Normal' },
                   { id: 'capitalize', label: 'Title Case' },
                 ].map((item) => (
                   <button
                     key={item.id}
                     onClick={() => onUpdateStyle({ textTransform: item.id })}
-                    className={`py-1.5 px-2 rounded text-[11px] font-semibold border transition-all ${
+                    className={`py-1.5 px-2 rounded-lg text-[11px] font-semibold border transition-all cursor-pointer ${
                       style.textTransform === item.id
-                        ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40'
-                        : 'bg-[#151722] text-zinc-400 border-[#242838]'
+                        ? 'bg-zinc-900 text-white border-zinc-900'
+                        : 'bg-white text-zinc-600 border-zinc-200 hover:bg-zinc-50'
                     }`}
                   >
                     {item.label}
@@ -179,21 +198,21 @@ export function StyleStudio({
 
             {/* Font Weight */}
             <div>
-              <label className="text-xs font-semibold text-zinc-300 block mb-1.5">
-                Weight
+              <label className="text-xs font-semibold text-zinc-700 block mb-1">
+                Font Weight
               </label>
               <div className="grid grid-cols-3 gap-1.5">
                 {['600', '800', '900'].map((w) => (
                   <button
                     key={w}
                     onClick={() => onUpdateStyle({ fontWeight: w })}
-                    className={`py-1.5 px-2 rounded text-[11px] font-semibold border transition-all ${
+                    className={`py-1.5 px-2 rounded-lg text-[11px] font-semibold border transition-all cursor-pointer ${
                       style.fontWeight === w
-                        ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40'
-                        : 'bg-[#151722] text-zinc-400 border-[#242838]'
+                        ? 'bg-zinc-900 text-white border-zinc-900'
+                        : 'bg-white text-zinc-600 border-zinc-200 hover:bg-zinc-50'
                     }`}
                   >
-                    {w === '600' ? 'Bold' : w === '800' ? 'Extra Bold' : 'Black (900)'}
+                    {w === '600' ? 'Bold' : w === '800' ? 'Extra' : 'Black (900)'}
                   </button>
                 ))}
               </div>
@@ -206,7 +225,7 @@ export function StyleStudio({
           <div className="space-y-4">
             {/* Text Color */}
             <div>
-              <label className="text-xs font-semibold text-zinc-300 block mb-1.5">
+              <label className="text-xs font-semibold text-zinc-700 block mb-1">
                 Text Fill Color
               </label>
               <div className="flex items-center gap-2">
@@ -214,13 +233,13 @@ export function StyleStudio({
                   type="color"
                   value={style.color}
                   onChange={(e) => onUpdateStyle({ color: e.target.value })}
-                  className="w-8 h-8 rounded border border-[#2b3042] bg-transparent cursor-pointer"
+                  className="w-8 h-8 rounded border border-zinc-200 bg-transparent cursor-pointer"
                 />
                 <input
                   type="text"
                   value={style.color}
                   onChange={(e) => onUpdateStyle({ color: e.target.value })}
-                  className="w-24 bg-[#151722] border border-[#262a3a] rounded px-2 py-1 text-xs font-mono text-zinc-200"
+                  className="w-24 bg-white border border-zinc-200 rounded px-2 py-1 text-xs font-mono text-zinc-800"
                 />
                 <div className="flex gap-1">
                   {['#FFE600', '#FFFFFF', '#00F2FE', '#FF2E93', '#22C55E'].map((c) => (
@@ -228,7 +247,7 @@ export function StyleStudio({
                       key={c}
                       onClick={() => onUpdateStyle({ color: c })}
                       style={{ backgroundColor: c }}
-                      className="w-5 h-5 rounded-full border border-black/40 hover:scale-110 transition-transform"
+                      className="w-5 h-5 rounded-full border border-zinc-300 hover:scale-110 transition-transform cursor-pointer"
                     />
                   ))}
                 </div>
@@ -237,9 +256,9 @@ export function StyleStudio({
 
             {/* Stroke Width & Color */}
             <div>
-              <div className="flex justify-between text-xs font-medium text-zinc-300 mb-1">
+              <div className="flex justify-between text-xs font-medium text-zinc-700 mb-1">
                 <span>Outline Stroke</span>
-                <span className="font-mono text-cyan-400">{style.strokeWidth}px</span>
+                <span className="font-mono text-lime-700 font-bold">{style.strokeWidth}px</span>
               </div>
               <input
                 type="range"
@@ -248,24 +267,15 @@ export function StyleStudio({
                 step={0.5}
                 value={style.strokeWidth}
                 onChange={(e) => onUpdateStyle({ strokeWidth: parseFloat(e.target.value) })}
-                className="w-full mb-2"
+                className="w-full"
               />
-              <div className="flex items-center gap-2">
-                <input
-                  type="color"
-                  value={style.strokeColor}
-                  onChange={(e) => onUpdateStyle({ strokeColor: e.target.value })}
-                  className="w-7 h-7 rounded border border-[#2b3042] bg-transparent cursor-pointer"
-                />
-                <span className="text-xs text-zinc-400">Stroke Color: {style.strokeColor}</span>
-              </div>
             </div>
 
-            {/* Drop Shadow Blur */}
+            {/* Shadow Blur */}
             <div>
-              <div className="flex justify-between text-xs font-medium text-zinc-300 mb-1">
-                <span>Shadow Blur</span>
-                <span className="font-mono text-cyan-400">{style.shadowBlur}px</span>
+              <div className="flex justify-between text-xs font-medium text-zinc-700 mb-1">
+                <span>Drop Shadow Blur</span>
+                <span className="font-mono text-lime-700 font-bold">{style.shadowBlur}px</span>
               </div>
               <input
                 type="range"
@@ -276,174 +286,30 @@ export function StyleStudio({
                 className="w-full"
               />
             </div>
-
-            {/* Display & Karaoke Mode */}
-            <div className="pt-2 border-t border-[#1f2230]">
-              <label className="text-xs font-semibold text-zinc-300 block mb-1.5">
-                Karaoke Animation
-              </label>
-              <div className="grid grid-cols-2 gap-2 mb-2">
-                <button
-                  onClick={() => onChangeDisplayMode('line')}
-                  className={`py-1.5 px-2 rounded text-xs font-medium border transition-all ${
-                    displayMode === 'line'
-                      ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40'
-                      : 'bg-[#151722] text-zinc-400 border-[#242838]'
-                  }`}
-                >
-                  Standard Line
-                </button>
-                <button
-                  onClick={() => onChangeDisplayMode('karaoke')}
-                  className={`py-1.5 px-2 rounded text-xs font-medium border transition-all ${
-                    displayMode === 'karaoke'
-                      ? 'bg-gradient-to-r from-cyan-500/20 to-emerald-500/20 text-emerald-300 border-emerald-500/40'
-                      : 'bg-[#151722] text-zinc-400 border-[#242838]'
-                  }`}
-                >
-                  Active Word Highlight
-                </button>
-              </div>
-
-              {displayMode === 'karaoke' && (
-                <div className="flex items-center gap-2 mt-2">
-                  <input
-                    type="color"
-                    value={style.highlightColor}
-                    onChange={(e) => onUpdateStyle({ highlightColor: e.target.value })}
-                    className="w-7 h-7 rounded border border-[#2b3042] bg-transparent cursor-pointer"
-                  />
-                  <span className="text-xs text-zinc-300">Karaoke Word Color</span>
-                </div>
-              )}
-            </div>
           </div>
         )}
 
-        {/* BACKGROUND BOX & SIZING TAB */}
+        {/* BOX TAB */}
         {activeTab === 'box' && (
           <div className="space-y-4">
-            {/* Box Dimensions & Custom Width Section */}
-            <div className="space-y-3 pb-3 border-b border-[#1f2230]">
-              <label className="text-xs font-bold text-zinc-200 block">
-                Caption Box Width
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-semibold text-zinc-800">
+                Background Badge Box
               </label>
-              
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  onClick={() => onUpdateStyle({ boxWidth: 0 })}
-                  className={`py-1.5 px-2 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
-                    !style.boxWidth
-                      ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/50 shadow-sm'
-                      : 'bg-[#151722] text-zinc-400 border-[#242838] hover:text-zinc-200'
-                  }`}
-                >
-                  Auto Fit (Text)
-                </button>
-                <button
-                  onClick={() => onUpdateStyle({ boxWidth: style.boxWidth || 320 })}
-                  className={`py-1.5 px-2 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
-                    style.boxWidth
-                      ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/50 shadow-sm'
-                      : 'bg-[#151722] text-zinc-400 border-[#242838] hover:text-zinc-200'
-                  }`}
-                >
-                  Custom Width
-                </button>
-              </div>
-
-              {style.boxWidth > 0 && (
-                <div>
-                  <div className="flex justify-between text-xs font-medium text-zinc-300 mb-1">
-                    <span>Width Slider</span>
-                    <span className="font-mono text-cyan-400">{style.boxWidth}px</span>
-                  </div>
-                  <input
-                    type="range"
-                    min={120}
-                    max={750}
-                    step={10}
-                    value={style.boxWidth}
-                    onChange={(e) => onUpdateStyle({ boxWidth: parseInt(e.target.value) })}
-                    className="w-full"
-                  />
-                  <div className="flex justify-between text-[10px] text-zinc-500 font-mono mt-0.5">
-                    <span>120px (Narrow)</span>
-                    <span>750px (Wide)</span>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Padding Controls */}
-            <div className="space-y-3 pb-3 border-b border-[#1f2230]">
-              <label className="text-xs font-bold text-zinc-200 block">
-                Box Padding & Spacing
-              </label>
-
-              <div>
-                <div className="flex justify-between text-xs font-medium text-zinc-300 mb-1">
-                  <span>Horizontal Padding</span>
-                  <span className="font-mono text-cyan-400">{style.boxPaddingX ?? 18}px</span>
-                </div>
-                <input
-                  type="range"
-                  min={4}
-                  max={60}
-                  value={style.boxPaddingX ?? 18}
-                  onChange={(e) => onUpdateStyle({ boxPaddingX: parseInt(e.target.value) })}
-                  className="w-full"
-                />
-              </div>
-
-              <div>
-                <div className="flex justify-between text-xs font-medium text-zinc-300 mb-1">
-                  <span>Vertical Padding</span>
-                  <span className="font-mono text-cyan-400">{style.boxPaddingY ?? 8}px</span>
-                </div>
-                <input
-                  type="range"
-                  min={2}
-                  max={40}
-                  value={style.boxPaddingY ?? 8}
-                  onChange={(e) => onUpdateStyle({ boxPaddingY: parseInt(e.target.value) })}
-                  className="w-full"
-                />
-              </div>
-            </div>
-
-            {/* Background Color & Opacity Toggle */}
-            <div className="flex items-center justify-between p-2.5 rounded-lg bg-[#151722] border border-[#242838]">
-              <span className="text-xs font-semibold text-zinc-200">Show Background Color Box</span>
               <input
                 type="checkbox"
                 checked={style.hasBackgroundBox}
                 onChange={(e) => onUpdateStyle({ hasBackgroundBox: e.target.checked })}
-                className="w-4 h-4 accent-cyan-400 cursor-pointer"
+                className="w-4 h-4 accent-[#84cc16]"
               />
             </div>
 
             {style.hasBackgroundBox && (
-              <>
+              <div className="space-y-3 pt-2 border-t border-zinc-100">
                 <div>
-                  <label className="text-xs font-semibold text-zinc-300 block mb-1">
-                    Box Color
-                  </label>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="color"
-                      value={style.boxColor}
-                      onChange={(e) => onUpdateStyle({ boxColor: e.target.value })}
-                      className="w-8 h-8 rounded border border-[#2b3042] bg-transparent cursor-pointer"
-                    />
-                    <span className="text-xs font-mono text-zinc-300">{style.boxColor}</span>
-                  </div>
-                </div>
-
-                <div>
-                  <div className="flex justify-between text-xs font-medium text-zinc-300 mb-1">
+                  <div className="flex justify-between text-xs text-zinc-600 mb-1">
                     <span>Opacity</span>
-                    <span className="font-mono text-cyan-400">{Math.round((style.boxOpacity || 0.8) * 100)}%</span>
+                    <span className="font-mono text-lime-700">{Math.round((style.boxOpacity || 0.8) * 100)}%</span>
                   </div>
                   <input
                     type="range"
@@ -457,20 +323,20 @@ export function StyleStudio({
                 </div>
 
                 <div>
-                  <div className="flex justify-between text-xs font-medium text-zinc-300 mb-1">
+                  <div className="flex justify-between text-xs text-zinc-600 mb-1">
                     <span>Corner Radius</span>
-                    <span className="font-mono text-cyan-400">{style.boxRadius || 8}px</span>
+                    <span className="font-mono text-lime-700">{style.boxRadius || 8}px</span>
                   </div>
                   <input
                     type="range"
                     min={0}
-                    max={36}
+                    max={24}
                     value={style.boxRadius || 8}
                     onChange={(e) => onUpdateStyle({ boxRadius: parseInt(e.target.value) })}
                     className="w-full"
                   />
                 </div>
-              </>
+              </div>
             )}
           </div>
         )}
@@ -478,62 +344,48 @@ export function StyleStudio({
         {/* POSITION TAB */}
         {activeTab === 'position' && (
           <div className="space-y-4">
-            <div>
-              <label className="text-xs font-semibold text-zinc-300 block mb-2">
-                Quick Position Presets
-              </label>
-              <div className="grid grid-cols-1 gap-1.5">
-                {POSITION_PRESETS.map((p) => (
-                  <button
-                    key={p.id}
-                    onClick={() => handleSetPositionPreset(p)}
-                    className="flex items-center justify-between py-2 px-3 rounded-lg bg-[#151722] hover:bg-[#1c202e] border border-[#242838] hover:border-cyan-500/40 text-xs font-medium text-zinc-300 hover:text-cyan-300 transition-all text-left"
-                  >
-                    <span>{p.name}</span>
-                    <span className="font-mono text-[10px] text-zinc-500">Y: {p.y}%</span>
-                  </button>
-                ))}
-              </div>
+            <label className="text-xs font-semibold text-zinc-700 block mb-1">
+              Position Presets
+            </label>
+            <div className="grid grid-cols-2 gap-2">
+              {POSITION_PRESETS.map((p) => (
+                <button
+                  key={p.name}
+                  onClick={() => handleSetPositionPreset(p)}
+                  className="p-2 rounded-lg border border-zinc-200 hover:border-lime-500 bg-white hover:bg-lime-50/40 text-xs font-semibold text-zinc-800 transition-all cursor-pointer shadow-2xs"
+                >
+                  {p.name}
+                </button>
+              ))}
             </div>
 
-            <div className="pt-2 border-t border-[#1f2230] space-y-3">
-              <div>
-                <div className="flex justify-between text-xs font-medium text-zinc-300 mb-1">
-                  <span>Horizontal (X)</span>
-                  <span className="font-mono text-cyan-400">{position.x}%</span>
-                </div>
-                <input
-                  type="range"
-                  min={5}
-                  max={95}
-                  value={position.x}
-                  onChange={(e) => onUpdatePosition({ x: parseFloat(e.target.value) })}
-                  className="w-full"
-                />
+            {/* Display Mode (Karaoke vs Line) */}
+            <div className="pt-3 border-t border-zinc-100">
+              <label className="text-xs font-semibold text-zinc-700 block mb-1.5">
+                Display Mode
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  onClick={() => onChangeDisplayMode?.('karaoke')}
+                  className={`py-1.5 px-2 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
+                    displayMode === 'karaoke'
+                      ? 'bg-zinc-900 text-white border-zinc-900'
+                      : 'bg-white text-zinc-600 border-zinc-200'
+                  }`}
+                >
+                  Karaoke Word Glow
+                </button>
+                <button
+                  onClick={() => onChangeDisplayMode?.('line')}
+                  className={`py-1.5 px-2 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
+                    displayMode === 'line'
+                      ? 'bg-zinc-900 text-white border-zinc-900'
+                      : 'bg-white text-zinc-600 border-zinc-200'
+                  }`}
+                >
+                  Static Line
+                </button>
               </div>
-
-              <div>
-                <div className="flex justify-between text-xs font-medium text-zinc-300 mb-1">
-                  <span>Vertical (Y)</span>
-                  <span className="font-mono text-cyan-400">{position.y}%</span>
-                </div>
-                <input
-                  type="range"
-                  min={5}
-                  max={95}
-                  value={position.y}
-                  onChange={(e) => onUpdatePosition({ y: parseFloat(e.target.value) })}
-                  className="w-full"
-                />
-              </div>
-
-              <button
-                onClick={() => onUpdatePosition({ x: 50, y: 85 })}
-                className="w-full flex items-center justify-center gap-1.5 py-2 rounded-lg bg-[#181b26] hover:bg-[#202434] text-zinc-300 text-xs font-medium border border-[#272b3b] transition-colors"
-              >
-                <RotateCcw className="w-3.5 h-3.5" />
-                <span>Reset to Bottom Center</span>
-              </button>
             </div>
           </div>
         )}
