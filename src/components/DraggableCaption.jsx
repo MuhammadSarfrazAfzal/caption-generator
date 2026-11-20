@@ -458,3 +458,4 @@ function hexToRgba(hex = '#000000', alpha = 1) {
 
 
 // Interactive drag and drop repositioning
+// Word by word karaoke highlight
