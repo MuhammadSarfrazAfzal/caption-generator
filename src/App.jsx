@@ -643,40 +643,42 @@ export default function App() {
 
       {/* Shortcuts Modal */}
       {isShortcutsOpen && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-2xs flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl max-w-sm w-full p-5 shadow-2xl border border-zinc-200">
-            <div className="flex items-center justify-between pb-3 border-b border-zinc-100">
-              <div className="flex items-center gap-2 font-bold text-sm text-zinc-900">
-                <Keyboard className="w-4 h-4 text-lime-600" />
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-2xs flex items-center justify-center z-50 p-4 select-none">
+          <div className="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-zinc-200/90 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between pb-3.5 border-b border-zinc-100">
+              <div className="flex items-center gap-2.5 font-extrabold text-sm text-zinc-900">
+                <div className="w-7 h-7 rounded-lg bg-lime-100/80 border border-lime-300 flex items-center justify-center text-lime-800">
+                  <Keyboard className="w-3.5 h-3.5" />
+                </div>
                 <span>Keyboard Shortcuts</span>
               </div>
               <button
                 onClick={() => setIsShortcutsOpen(false)}
-                className="p-1 rounded-lg hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700"
+                className="p-1 rounded-lg hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700 cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
-            <div className="space-y-2.5 pt-3 text-xs text-zinc-600 font-medium">
+            <div className="space-y-3 pt-4 text-xs text-zinc-600 font-medium">
               <div className="flex justify-between items-center">
                 <span>Play / Pause</span>
-                <kbd className="px-2 py-0.5 rounded bg-zinc-100 font-mono text-zinc-800 border border-zinc-200 font-bold">Space</kbd>
+                <kbd className="px-2 py-0.5 rounded-lg bg-zinc-100 font-mono text-zinc-800 border border-zinc-200 font-bold text-[11px] shadow-2xs">Space</kbd>
               </div>
               <div className="flex justify-between items-center">
                 <span>Seek Back 3s</span>
-                <kbd className="px-2 py-0.5 rounded bg-zinc-100 font-mono text-zinc-800 border border-zinc-200 font-bold">← Left Arrow</kbd>
+                <kbd className="px-2 py-0.5 rounded-lg bg-zinc-100 font-mono text-zinc-800 border border-zinc-200 font-bold text-[11px] shadow-2xs">← Left</kbd>
               </div>
               <div className="flex justify-between items-center">
                 <span>Seek Forward 3s</span>
-                <kbd className="px-2 py-0.5 rounded bg-zinc-100 font-mono text-zinc-800 border border-zinc-200 font-bold">→ Right Arrow</kbd>
+                <kbd className="px-2 py-0.5 rounded-lg bg-zinc-100 font-mono text-zinc-800 border border-zinc-200 font-bold text-[11px] shadow-2xs">→ Right</kbd>
               </div>
               <div className="flex justify-between items-center">
-                <span>Undo</span>
-                <kbd className="px-2 py-0.5 rounded bg-zinc-100 font-mono text-zinc-800 border border-zinc-200 font-bold">Ctrl + Z</kbd>
+                <span>Undo Action</span>
+                <kbd className="px-2 py-0.5 rounded-lg bg-zinc-100 font-mono text-zinc-800 border border-zinc-200 font-bold text-[11px] shadow-2xs">Ctrl + Z</kbd>
               </div>
               <div className="flex justify-between items-center">
-                <span>Redo</span>
-                <kbd className="px-2 py-0.5 rounded bg-zinc-100 font-mono text-zinc-800 border border-zinc-200 font-bold">Ctrl + Y</kbd>
+                <span>Redo Action</span>
+                <kbd className="px-2 py-0.5 rounded-lg bg-zinc-100 font-mono text-zinc-800 border border-zinc-200 font-bold text-[11px] shadow-2xs">Ctrl + Y</kbd>
               </div>
             </div>
           </div>
@@ -685,46 +687,48 @@ export default function App() {
 
       {/* Find & Replace Modal */}
       {isFindReplaceOpen && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-2xs flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl max-w-sm w-full p-5 shadow-2xl border border-zinc-200">
-            <div className="flex items-center justify-between pb-3 border-b border-zinc-100">
-              <div className="flex items-center gap-2 font-bold text-sm text-zinc-900">
-                <Search className="w-4 h-4 text-lime-600" />
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-2xs flex items-center justify-center z-50 p-4 select-none">
+          <div className="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-zinc-200/90 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between pb-3.5 border-b border-zinc-100">
+              <div className="flex items-center gap-2.5 font-extrabold text-sm text-zinc-900">
+                <div className="w-7 h-7 rounded-lg bg-lime-100/80 border border-lime-300 flex items-center justify-center text-lime-800">
+                  <Search className="w-3.5 h-3.5" />
+                </div>
                 <span>Find & Replace</span>
               </div>
               <button
                 onClick={() => setIsFindReplaceOpen(false)}
-                className="p-1 rounded-lg hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700"
+                className="p-1 rounded-lg hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700 cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
-            <div className="space-y-3 pt-3">
+            <div className="space-y-3 pt-4">
               <div>
-                <label className="text-xs font-semibold text-zinc-600 block mb-1">Find text</label>
+                <label className="text-xs font-bold text-zinc-700 block mb-1">Find Roman Urdu Word</label>
                 <input
                   type="text"
                   value={findText}
                   onChange={(e) => setFindText(e.target.value)}
                   placeholder="e.g. ap"
-                  className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-3 py-1.5 text-xs text-zinc-900 focus:outline-none focus:border-lime-500"
+                  className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-3.5 py-2 text-xs text-zinc-900 focus:outline-none focus:border-lime-500 focus:bg-white shadow-2xs transition-colors"
                 />
               </div>
               <div>
-                <label className="text-xs font-semibold text-zinc-600 block mb-1">Replace with</label>
+                <label className="text-xs font-bold text-zinc-700 block mb-1">Replace With</label>
                 <input
                   type="text"
                   value={replaceText}
                   onChange={(e) => setReplaceText(e.target.value)}
                   placeholder="e.g. aap"
-                  className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-3 py-1.5 text-xs text-zinc-900 focus:outline-none focus:border-lime-500"
+                  className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-3.5 py-2 text-xs text-zinc-900 focus:outline-none focus:border-lime-500 focus:bg-white shadow-2xs transition-colors"
                 />
               </div>
               <button
                 onClick={handleApplyFindReplace}
-                className="w-full py-2 rounded-xl bg-[#bbf421] hover:bg-[#a3e635] text-zinc-950 font-bold text-xs tracking-tight shadow-sm cursor-pointer mt-2"
+                className="w-full py-2.5 rounded-xl bg-[#bbf421] hover:bg-[#a3e635] text-zinc-950 font-bold text-xs tracking-tight shadow-sm cursor-pointer mt-2"
               >
-                Replace All
+                Replace Across All Cues
               </button>
             </div>
           </div>

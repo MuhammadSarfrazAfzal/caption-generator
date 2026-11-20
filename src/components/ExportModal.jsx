@@ -7,7 +7,8 @@ import {
   Download, 
   CheckCircle, 
   Sparkles,
-  Zap
+  Zap,
+  Layers
 } from 'lucide-react';
 import { exportToSRT, exportToVTT, exportToJSON, exportToASS, renderAndBurnVideo } from '../utils/srtExporter';
 
@@ -174,54 +175,61 @@ export function ExportModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 select-none">
-      <div className="glass-modal w-full max-w-md rounded-2xl border border-[#2d3244] overflow-hidden shadow-2xl flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-2xs p-4 select-none">
+      <div className="bg-white w-full max-w-lg rounded-3xl border border-zinc-200/90 overflow-hidden shadow-2xl flex flex-col animate-in fade-in zoom-in-95 duration-150">
         {/* Header */}
-        <div className="px-5 py-4 border-b border-[#222634] flex items-center justify-between bg-[#12141c]">
-          <div className="flex items-center gap-2">
-            <Download className="w-4 h-4 text-emerald-400" />
-            <h2 className="text-sm font-bold text-zinc-100">
-              Export Roman Urdu Captions & 4K Video
-            </h2>
+        <div className="px-6 py-4.5 border-b border-zinc-100 flex items-center justify-between bg-white">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-xl bg-lime-100/80 border border-lime-300 flex items-center justify-center text-lime-800">
+              <Download className="w-4 h-4" />
+            </div>
+            <div>
+              <h2 className="text-sm font-extrabold text-zinc-900 tracking-tight">
+                Export Captions & Video
+              </h2>
+              <p className="text-[11px] text-zinc-400 font-medium">
+                Download subtitle files or burn permanent 4K typography into MP4
+              </p>
+            </div>
           </div>
           <button
             onClick={onClose}
             disabled={isBurning}
-            className="p-1 rounded-lg hover:bg-[#1f2230] text-zinc-400 hover:text-white transition-colors cursor-pointer"
+            className="p-1.5 rounded-xl hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700 transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Content */}
-        <div className="p-5 space-y-4">
+        <div className="p-6 space-y-4">
           {/* Burn-in Video Action Card */}
-          <div className="p-4 rounded-xl bg-gradient-to-r from-emerald-950/40 via-[#151a24] to-[#12141c] border border-emerald-600/30 flex flex-col gap-3">
+          <div className="p-4 rounded-2xl bg-zinc-50/70 border border-zinc-200/80 flex flex-col gap-3.5 shadow-2xs">
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
-                  <Film className="w-5 h-5" />
+                <div className="w-9 h-9 rounded-xl bg-lime-200/60 border border-lime-400/80 flex items-center justify-center text-zinc-900">
+                  <Film className="w-5 h-5 text-lime-800" />
                 </div>
                 <div>
-                  <h3 className="text-xs font-bold text-zinc-100 flex items-center gap-1.5">
+                  <h3 className="text-xs font-bold text-zinc-900 flex items-center gap-1.5">
                     <span>Burn-in Captions into Video</span>
-                    <span className="text-[10px] px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 font-mono border border-emerald-500/30">
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-lime-100 text-lime-900 font-mono font-bold border border-lime-300">
                       4K Ultra HD
                     </span>
                   </h3>
-                  <p className="text-[11px] text-zinc-400">
-                    Renders razor-sharp typography at up to 3840x2160 resolution.
+                  <p className="text-[11px] text-zinc-500">
+                    Embeds styled Roman Urdu captions permanently with hardware acceleration.
                   </p>
                 </div>
               </div>
             </div>
 
             {/* Resolution Selector */}
-            <div className="space-y-1">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">
-                Export Resolution Quality:
+            <div className="space-y-1.5">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
+                Export Resolution Quality
               </span>
-              <div className="grid grid-cols-3 gap-1.5">
+              <div className="grid grid-cols-3 gap-2">
                 {[
                   { id: '4k', label: '4K Ultra HD', desc: '3840 x 2160' },
                   { id: '1080p', label: '1080p FHD', desc: '1920 x 1080' },
@@ -230,14 +238,14 @@ export function ExportModal({
                   <button
                     key={res.id}
                     onClick={() => setResolution(res.id)}
-                    className={`p-2 rounded-lg border text-center transition-all cursor-pointer ${
+                    className={`p-2.5 rounded-xl border text-center transition-all cursor-pointer ${
                       resolution === res.id
-                        ? 'bg-emerald-500/20 border-emerald-400/80 text-emerald-300 shadow-sm'
-                        : 'bg-[#151722] border-[#252838] text-zinc-400 hover:text-zinc-200'
+                        ? 'bg-lime-50 border-lime-500 text-zinc-950 font-bold shadow-2xs ring-1 ring-lime-400/30'
+                        : 'bg-white border-zinc-200 text-zinc-600 hover:border-zinc-300 hover:bg-zinc-50'
                     }`}
                   >
                     <div className="text-[11px] font-bold">{res.label}</div>
-                    <div className="text-[9px] text-zinc-500 font-mono">{res.desc}</div>
+                    <div className="text-[9px] text-zinc-400 font-mono">{res.desc}</div>
                   </button>
                 ))}
               </div>
@@ -245,84 +253,92 @@ export function ExportModal({
 
             {isBurning ? (
               <div className="space-y-2 pt-1">
-                <div className="flex justify-between text-xs font-mono text-emerald-300">
+                <div className="flex justify-between text-xs font-mono text-lime-800 font-semibold">
                   <span className="truncate max-w-[240px]">{burnStatusText}</span>
                   <span>{burnProgress}%</span>
                 </div>
-                <div className="w-full bg-[#151722] rounded-full h-2 overflow-hidden border border-[#2b3042]">
+                <div className="w-full bg-zinc-200 rounded-full h-2.5 overflow-hidden">
                   <div
                     style={{ width: `${burnProgress}%` }}
-                    className="bg-gradient-to-r from-emerald-500 via-cyan-400 to-emerald-400 h-full transition-all duration-150"
+                    className="bg-[#bbf421] h-full transition-all duration-150"
                   />
                 </div>
               </div>
             ) : isDone ? (
-              <div className="flex items-center gap-2 text-xs font-semibold text-emerald-400 py-1">
-                <CheckCircle className="w-4 h-4" />
-                <span>4K Video Rendered & Saved!</span>
+              <div className="flex items-center gap-2 text-xs font-bold text-lime-700 bg-lime-50 border border-lime-300 px-3 py-2 rounded-xl">
+                <CheckCircle className="w-4 h-4 text-lime-600" />
+                <span>Video successfully rendered and saved!</span>
               </div>
             ) : (
               <button
                 onClick={handleBurnVideo}
-                className="w-full py-2.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-500/20 transition-all cursor-pointer"
+                className="w-full py-2.5 rounded-xl bg-[#bbf421] hover:bg-[#a3e635] text-zinc-950 font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm transition-all cursor-pointer tracking-tight"
               >
                 <Sparkles className="w-3.5 h-3.5" />
-                <span>Render & Save {resolution.toUpperCase()} Video</span>
+                <span>Render & Save {resolution.toUpperCase()} MP4 Video</span>
               </button>
             )}
           </div>
 
           {/* Subtitle File Exports */}
           <div>
-            <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-400 block mb-2">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-500 block mb-2.5">
               Export Subtitle Files
             </span>
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-4 gap-2.5">
               <button
                 onClick={handleExportSRT}
-                className="p-2.5 rounded-xl bg-[#151722] hover:bg-[#1c202e] border border-[#242838] hover:border-cyan-500/50 flex flex-col items-center gap-1 transition-all text-center cursor-pointer"
+                className="p-3 rounded-2xl bg-white hover:bg-zinc-50 border border-zinc-200 hover:border-zinc-300 flex flex-col items-center gap-1 transition-all text-center cursor-pointer shadow-2xs group"
               >
-                <FileText className="w-4 h-4 text-yellow-400" />
-                <span className="text-[11px] font-bold text-zinc-200">.SRT</span>
-                <span className="text-[9px] text-zinc-500">SubRip</span>
+                <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center mb-0.5 group-hover:scale-105 transition-transform">
+                  <FileText className="w-4 h-4" />
+                </div>
+                <span className="text-xs font-bold text-zinc-900">.SRT</span>
+                <span className="text-[9px] text-zinc-400">SubRip</span>
               </button>
 
               <button
                 onClick={handleExportVTT}
-                className="p-2.5 rounded-xl bg-[#151722] hover:bg-[#1c202e] border border-[#242838] hover:border-cyan-500/50 flex flex-col items-center gap-1 transition-all text-center cursor-pointer"
+                className="p-3 rounded-2xl bg-white hover:bg-zinc-50 border border-zinc-200 hover:border-zinc-300 flex flex-col items-center gap-1 transition-all text-center cursor-pointer shadow-2xs group"
               >
-                <FileText className="w-4 h-4 text-cyan-400" />
-                <span className="text-[11px] font-bold text-zinc-200">.VTT</span>
-                <span className="text-[9px] text-zinc-500">WebVTT</span>
+                <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-0.5 group-hover:scale-105 transition-transform">
+                  <FileText className="w-4 h-4" />
+                </div>
+                <span className="text-xs font-bold text-zinc-900">.VTT</span>
+                <span className="text-[9px] text-zinc-400">WebVTT</span>
               </button>
 
               <button
                 onClick={handleExportASS}
-                className="p-2.5 rounded-xl bg-[#151722] hover:bg-[#1c202e] border border-[#242838] hover:border-cyan-500/50 flex flex-col items-center gap-1 transition-all text-center cursor-pointer"
+                className="p-3 rounded-2xl bg-white hover:bg-zinc-50 border border-zinc-200 hover:border-zinc-300 flex flex-col items-center gap-1 transition-all text-center cursor-pointer shadow-2xs group"
               >
-                <FileText className="w-4 h-4 text-purple-400" />
-                <span className="text-[11px] font-bold text-zinc-200">.ASS</span>
-                <span className="text-[9px] text-zinc-500">Styled ASS</span>
+                <div className="w-8 h-8 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center mb-0.5 group-hover:scale-105 transition-transform">
+                  <FileText className="w-4 h-4" />
+                </div>
+                <span className="text-xs font-bold text-zinc-900">.ASS</span>
+                <span className="text-[9px] text-zinc-400">Styled ASS</span>
               </button>
 
               <button
                 onClick={handleExportJSON}
-                className="p-2.5 rounded-xl bg-[#151722] hover:bg-[#1c202e] border border-[#242838] hover:border-cyan-500/50 flex flex-col items-center gap-1 transition-all text-center cursor-pointer"
+                className="p-3 rounded-2xl bg-white hover:bg-zinc-50 border border-zinc-200 hover:border-zinc-300 flex flex-col items-center gap-1 transition-all text-center cursor-pointer shadow-2xs group"
               >
-                <Code className="w-4 h-4 text-emerald-400" />
-                <span className="text-[11px] font-bold text-zinc-200">.JSON</span>
-                <span className="text-[9px] text-zinc-500">Project</span>
+                <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-0.5 group-hover:scale-105 transition-transform">
+                  <Code className="w-4 h-4" />
+                </div>
+                <span className="text-xs font-bold text-zinc-900">.JSON</span>
+                <span className="text-[9px] text-zinc-400">Project</span>
               </button>
             </div>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="px-5 py-3 bg-[#12141c] border-t border-[#222634] flex justify-end">
+        <div className="px-6 py-3.5 bg-zinc-50/70 border-t border-zinc-100 flex justify-end">
           <button
             onClick={onClose}
             disabled={isBurning}
-            className="px-4 py-1.5 rounded-lg text-xs font-medium bg-[#1a1d28] hover:bg-[#232736] text-zinc-300 transition-colors cursor-pointer"
+            className="px-4 py-1.5 rounded-xl text-xs font-semibold bg-white hover:bg-zinc-100 text-zinc-700 border border-zinc-200 shadow-2xs transition-colors cursor-pointer"
           >
             Close
           </button>
