@@ -541,3 +541,5 @@ export function StyleStudio({
     </aside>
   );
 }
+
+// Font styling controls
