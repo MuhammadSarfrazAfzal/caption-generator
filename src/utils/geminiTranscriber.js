@@ -295,5 +295,3 @@ function normalizeCaptions(captions, maxWords = 3) {
 
   return splitCaptionsIntoMaxWords(initial, maxWords);
 }
-
-// Timestamp healing validated for video sync
