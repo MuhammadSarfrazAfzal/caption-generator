@@ -1,5 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Move, Minus, Plus, AlignCenter, Maximize2, Type, RotateCcw, Check } from 'lucide-react';
+import { 
+  Move, 
+  Minus, 
+  Plus, 
+  AlignCenter, 
+  RotateCcw, 
+  Check, 
+  Sparkles,
+  Maximize2
+} from 'lucide-react';
 
 export function DraggableCaption({
   caption,
@@ -33,7 +42,6 @@ export function DraggableCaption({
   // Proximity detection: detect when cursor is near the caption box (within 50px)
   useEffect(() => {
     const handleWindowMouseMove = (e) => {
-      // Don't calculate proximity while dragging or resizing
       if (isDragging || resizingCorner) return;
       if (!captionRef.current) return;
 
@@ -42,16 +50,13 @@ export function DraggableCaption({
       const dy = Math.max(rect.top - e.clientY, 0, e.clientY - rect.bottom);
       const dist = Math.sqrt(dx * dx + dy * dy);
 
-      // Within 50px of the box, trigger isNear
       setIsNear(dist <= 50);
     };
 
     const handleWindowMouseDown = (e) => {
-      // If clicking inside the caption or its toolbar, select it
       if (captionRef.current && captionRef.current.contains(e.target)) {
         setIsSelected(true);
       } else {
-        // If clicking outside (e.g. video background or elsewhere), deselect
         setIsSelected(false);
       }
     };
@@ -78,7 +83,6 @@ export function DraggableCaption({
         const mouseX = e.clientX - containerRect.left - dragOffset.x + captionRect.width / 2;
         const mouseY = e.clientY - containerRect.top - dragOffset.y + captionRect.height / 2;
 
-        // Prevent handles from getting cut off by clamping within container edges
         const halfPctX = Math.min(40, ((captionRect.width / 2) / containerRect.width) * 100);
         const halfPctY = Math.min(40, ((captionRect.height / 2) / containerRect.height) * 100);
 
@@ -102,7 +106,6 @@ export function DraggableCaption({
         const dy = e.clientY - mouseY;
 
         if (['se', 'ne', 'sw', 'nw'].includes(resizingCorner)) {
-          // Corner Scaling: directly scales font size and keeps box in sync!
           let scaleDelta = 0;
           if (resizingCorner === 'se') scaleDelta = (dx + dy) * 0.28;
           else if (resizingCorner === 'ne') scaleDelta = (dx - dy) * 0.28;
@@ -112,7 +115,6 @@ export function DraggableCaption({
           const newFontSize = Math.max(16, Math.min(100, Math.round(startFontSize + scaleDelta)));
           const updates = { fontSize: newFontSize };
           
-          // Proportional width scale if a custom boxWidth was set
           if (style.boxWidth && startBoxWidth) {
             const scaleRatio = newFontSize / startFontSize;
             updates.boxWidth = Math.max(100, Math.min(Math.round(containerRect.width * 0.94), Math.round(startBoxWidth * scaleRatio)));
@@ -120,13 +122,11 @@ export function DraggableCaption({
 
           onUpdateStyle(updates);
         } else if (resizingCorner === 'e' || resizingCorner === 'w') {
-          // Horizontal Edge: Directly resizes caption box width!
           const deltaX = resizingCorner === 'e' ? dx : -dx;
           const maxAllowedWidth = Math.round(containerRect.width * 0.94);
           const newWidth = Math.max(100, Math.min(maxAllowedWidth, Math.round(startBoxWidth + deltaX * 2)));
           onUpdateStyle({ boxWidth: newWidth });
         } else if (resizingCorner === 's' || resizingCorner === 'n') {
-          // Vertical Edge: Adjusts vertical box padding
           const deltaY = resizingCorner === 's' ? dy : -dy;
           const newPaddingY = Math.max(2, Math.min(60, Math.round(startPaddingY + deltaY * 0.5)));
           onUpdateStyle({ boxPaddingY: newPaddingY });
@@ -154,14 +154,13 @@ export function DraggableCaption({
     return null;
   }
 
-  // Mouse down for moving
   const handleMouseDownMove = (e) => {
     if (e.target.closest('.no-drag') || e.target.closest('.resize-handle')) return;
 
     e.preventDefault();
     e.stopPropagation();
 
-    setIsSelected(true); // Clicking on box selects it
+    setIsSelected(true);
 
     if (!containerRef?.current || !captionRef.current) return;
 
@@ -173,12 +172,11 @@ export function DraggableCaption({
     });
   };
 
-  // Mouse down for corner and edge resizing
   const handleResizeStart = (e, corner) => {
     e.preventDefault();
     e.stopPropagation();
 
-    setIsSelected(true); // Resizing keeps it selected
+    setIsSelected(true);
 
     const captionRect = captionRef.current ? captionRef.current.getBoundingClientRect() : null;
     const currentRenderedWidth = captionRect ? Math.round(captionRect.width) : 250;
@@ -199,14 +197,13 @@ export function DraggableCaption({
   const displayText = textTransform === 'uppercase' ? rawText.toUpperCase() : rawText;
 
   const textShadow = (style.shadowBlur || 0) > 0
-    ? `${style.shadowOffsetX || 0}px ${style.shadowOffsetY || 3}px ${style.shadowBlur || 8}px ${style.shadowColor || 'rgba(0,0,0,0.8)'}`
+    ? `${style.shadowOffsetX || 0}px ${style.shadowOffsetY || 3}px ${style.shadowBlur || 8}px ${style.shadowColor || 'rgba(0,0,0,0.85)'}`
     : 'none';
 
   const textStroke = (style.strokeWidth || 0) > 0
     ? `${style.strokeWidth}px ${style.strokeColor || '#000000'}`
     : 'none';
 
-  // Box is visible if clicked (selected), hovered, cursor is near (within 50px), dragging, or resizing!
   const showOverlay = isSelected || isHovered || isNear || isDragging || Boolean(resizingCorner);
   const words = Array.isArray(caption.words) ? caption.words : [];
   const currentFontSize = style.fontSize || 34;
@@ -229,40 +226,40 @@ export function DraggableCaption({
       }}
       className="group select-none inline-block"
     >
-      {/* Floating Quick Action Toolbar */}
+      {/* World-Class Floating Frosted Glass Action Capsule */}
       {showOverlay && onUpdateStyle && (
         <div 
-          className="no-drag absolute -top-12 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#0d0f17fa] backdrop-blur-md border border-cyan-400 text-white shadow-[0_8px_25px_rgba(0,0,0,0.8)] z-30 pointer-events-auto animate-in fade-in zoom-in-95 duration-100 whitespace-nowrap"
+          className="no-drag absolute -top-13 left-1/2 -translate-x-1/2 flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-950/90 backdrop-blur-2xl border border-white/20 text-white shadow-[0_12px_40px_rgba(0,0,0,0.5),0_0_0_1px_rgba(255,255,255,0.08)] z-30 pointer-events-auto animate-in fade-in zoom-in-95 duration-150 whitespace-nowrap"
           onMouseDown={(e) => e.stopPropagation()}
         >
-          {/* Active selection dot / coordinates */}
-          <div className="flex items-center gap-1 text-[10px] text-cyan-300 font-mono pr-1.5 border-r border-zinc-700">
-            <span className={`w-2 h-2 rounded-full ${isSelected ? 'bg-cyan-400 shadow-[0_0_8px_#00f2fe]' : 'bg-cyan-500/40'}`} />
+          {/* Coordinates Indicator */}
+          <div className="flex items-center gap-1.5 text-[11px] text-zinc-300 font-mono pr-2 border-r border-white/15">
+            <span className={`w-2 h-2 rounded-full ${isSelected ? 'bg-[#bbf421] shadow-[0_0_8px_#bbf421]' : 'bg-zinc-500'}`} />
             <span>{position.x}%, {position.y}%</span>
           </div>
 
-          {/* Quick Font Size Buttons */}
-          <div className="flex items-center gap-1 pr-1.5 border-r border-zinc-700">
-            <span className="text-[10px] text-zinc-400 font-semibold">Size:</span>
+          {/* Precision Size Stepper */}
+          <div className="flex items-center gap-1.5 pr-2 border-r border-white/15">
+            <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">Size</span>
             <button
               onClick={() => onUpdateStyle({ fontSize: Math.max(16, currentFontSize - 2) })}
-              className="w-5 h-5 rounded bg-[#1e2230] hover:bg-[#2b3044] active:scale-95 flex items-center justify-center text-zinc-200 cursor-pointer"
+              className="w-5 h-5 rounded-md bg-white/10 hover:bg-white/20 active:scale-95 flex items-center justify-center text-zinc-200 cursor-pointer transition-colors"
               title="Decrease text size (-2px)"
             >
               <Minus className="w-3 h-3" />
             </button>
-            <span className="text-[11px] font-mono font-bold text-cyan-300 px-0.5">{currentFontSize}px</span>
+            <span className="text-[12px] font-mono font-bold text-white px-0.5">{currentFontSize}px</span>
             <button
               onClick={() => onUpdateStyle({ fontSize: Math.min(100, currentFontSize + 2) })}
-              className="w-5 h-5 rounded bg-[#1e2230] hover:bg-[#2b3044] active:scale-95 flex items-center justify-center text-zinc-200 cursor-pointer"
+              className="w-5 h-5 rounded-md bg-white/10 hover:bg-white/20 active:scale-95 flex items-center justify-center text-zinc-200 cursor-pointer transition-colors"
               title="Increase text size (+2px)"
             >
               <Plus className="w-3 h-3" />
             </button>
           </div>
 
-          {/* Quick Preset Sizes */}
-          <div className="flex items-center gap-1 pr-1.5 border-r border-zinc-700">
+          {/* Preset Size Pills (S, M, L, XL) */}
+          <div className="flex items-center gap-1 pr-2 border-r border-white/15">
             {[
               { label: 'S', size: 26 },
               { label: 'M', size: 34 },
@@ -272,10 +269,10 @@ export function DraggableCaption({
               <button
                 key={p.label}
                 onClick={() => onUpdateStyle({ fontSize: p.size })}
-                className={`text-[10px] font-bold px-1.5 py-0.5 rounded transition-all cursor-pointer ${
+                className={`text-[10px] font-bold px-2 py-0.5 rounded-full transition-all cursor-pointer ${
                   currentFontSize === p.size 
-                    ? 'bg-cyan-400 text-black shadow-sm font-black' 
-                    : 'bg-[#181b28] hover:bg-[#252a3e] text-zinc-300'
+                    ? 'bg-[#bbf421] text-zinc-950 font-black shadow-xs scale-105' 
+                    : 'bg-white/10 hover:bg-white/20 text-zinc-300'
                 }`}
                 title={`Set font size to ${p.size}px`}
               >
@@ -284,42 +281,42 @@ export function DraggableCaption({
             ))}
           </div>
 
-          {/* Box Width Mode (Custom or Auto) */}
-          <div className="flex items-center gap-1 pr-1.5 border-r border-zinc-700">
-            {style.boxWidth ? (
+          {/* Auto Width Reset if custom width */}
+          {style.boxWidth && (
+            <div className="flex items-center pr-2 border-r border-white/15">
               <button
                 onClick={() => onUpdateStyle({ boxWidth: null })}
-                className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 cursor-pointer"
-                title="Reset box width to Auto fit text"
+                className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-400/20 hover:bg-amber-400/30 text-amber-300 border border-amber-400/40 cursor-pointer"
+                title="Reset box width to Auto Fit"
               >
                 <RotateCcw className="w-2.5 h-2.5" />
                 <span>Auto Width</span>
               </button>
-            ) : (
-              <span className="text-[10px] text-zinc-400 px-1 font-mono">Fit Text</span>
-            )}
-          </div>
+            </div>
+          )}
 
-          {/* Quick Color Dots */}
-          <div className="flex items-center gap-1 pl-0.5">
+          {/* Quick Color Swatches */}
+          <div className="flex items-center gap-1.5 pl-0.5">
             {['#FFE600', '#FFFFFF', '#00F2FE', '#FF2E93', '#22C55E'].map((c) => (
               <button
                 key={c}
                 onClick={() => onUpdateStyle({ color: c })}
                 style={{ backgroundColor: c }}
-                className="w-3.5 h-3.5 rounded-full border border-black/50 hover:scale-125 transition-transform cursor-pointer"
+                className={`w-4 h-4 rounded-full border transition-transform cursor-pointer ${
+                  style.color?.toUpperCase() === c ? 'scale-125 ring-2 ring-[#bbf421] border-black' : 'border-black/40 hover:scale-115'
+                }`}
                 title={`Set color ${c}`}
               />
             ))}
           </div>
 
-          {/* Center Horizontally */}
+          {/* Horizontal Center Alignment */}
           <button
             onClick={() => onPositionChange?.({ x: 50, y: position.y })}
-            className="p-1 hover:bg-[#1e2230] rounded text-zinc-400 hover:text-cyan-300 ml-0.5 cursor-pointer"
-            title="Center Caption Horizontally (50%)"
+            className="p-1 hover:bg-white/15 rounded-md text-zinc-400 hover:text-white ml-0.5 cursor-pointer transition-colors"
+            title="Center Horizontally (50%)"
           >
-            <AlignCenter className="w-3 h-3" />
+            <AlignCenter className="w-3.5 h-3.5" />
           </button>
         </div>
       )}
@@ -354,62 +351,62 @@ export function DraggableCaption({
         }}
         className="caption-content"
       >
-        {/* Active Selection Outline with Drag-to-Resize Handles & Expanded Hit Targets */}
+        {/* Sleek Dynamic Glass Selection Frame */}
         {showOverlay && (
-          <div className={`absolute -inset-1.5 border-2 border-dashed rounded-lg pointer-events-none z-20 transition-all ${
+          <div className={`absolute -inset-2 border-[1.5px] rounded-xl pointer-events-none z-20 transition-all ${
             isSelected 
-              ? 'border-cyan-400 shadow-[0_0_20px_rgba(0,242,254,0.6)] ring-1 ring-cyan-300/40' 
-              : 'border-cyan-400/80 shadow-[0_0_12px_rgba(0,242,254,0.3)]'
+              ? 'border-white/95 shadow-[0_0_0_1px_rgba(0,0,0,0.5),0_8px_30px_rgba(0,0,0,0.4)]' 
+              : 'border-white/70 shadow-[0_0_0_1px_rgba(0,0,0,0.35)]'
           }`}>
-            {/* 4 Corner Drag-to-Resize Scale Handles with 26px generous hit area */}
+            {/* 4 Sleek Beveled Corner Knobs */}
             <div
               onMouseDown={(e) => handleResizeStart(e, 'nw')}
-              className="resize-handle pointer-events-auto absolute -top-2.5 -left-2.5 w-4 h-4 rounded-full bg-cyan-400 hover:bg-white hover:scale-125 ring-2 ring-black cursor-nwse-resize transition-transform before:absolute before:-inset-2.5 before:content-[''] shadow-md"
-              title="Drag to scale caption size"
+              className="resize-handle pointer-events-auto absolute -top-2 -left-2 w-3.5 h-3.5 rounded-full bg-white hover:bg-[#bbf421] ring-2 ring-zinc-950 shadow-md cursor-nwse-resize transition-all hover:scale-135 before:absolute before:-inset-3 before:content-['']"
+              title="Drag corner to scale size"
             />
             <div
               onMouseDown={(e) => handleResizeStart(e, 'ne')}
-              className="resize-handle pointer-events-auto absolute -top-2.5 -right-2.5 w-4 h-4 rounded-full bg-cyan-400 hover:bg-white hover:scale-125 ring-2 ring-black cursor-nesw-resize transition-transform before:absolute before:-inset-2.5 before:content-[''] shadow-md"
-              title="Drag to scale caption size"
+              className="resize-handle pointer-events-auto absolute -top-2 -right-2 w-3.5 h-3.5 rounded-full bg-white hover:bg-[#bbf421] ring-2 ring-zinc-950 shadow-md cursor-nesw-resize transition-all hover:scale-135 before:absolute before:-inset-3 before:content-['']"
+              title="Drag corner to scale size"
             />
             <div
               onMouseDown={(e) => handleResizeStart(e, 'sw')}
-              className="resize-handle pointer-events-auto absolute -bottom-2.5 -left-2.5 w-4 h-4 rounded-full bg-cyan-400 hover:bg-white hover:scale-125 ring-2 ring-black cursor-nesw-resize transition-transform before:absolute before:-inset-2.5 before:content-[''] shadow-md"
-              title="Drag to scale caption size"
+              className="resize-handle pointer-events-auto absolute -bottom-2 -left-2 w-3.5 h-3.5 rounded-full bg-white hover:bg-[#bbf421] ring-2 ring-zinc-950 shadow-md cursor-nesw-resize transition-all hover:scale-135 before:absolute before:-inset-3 before:content-['']"
+              title="Drag corner to scale size"
             />
             <div
               onMouseDown={(e) => handleResizeStart(e, 'se')}
-              className="resize-handle pointer-events-auto absolute -bottom-2.5 -right-2.5 w-4 h-4 rounded-full bg-cyan-400 hover:bg-white hover:scale-125 ring-2 ring-black cursor-nwse-resize transition-transform before:absolute before:-inset-2.5 before:content-[''] shadow-md"
-              title="Drag to scale caption size"
+              className="resize-handle pointer-events-auto absolute -bottom-2 -right-2 w-3.5 h-3.5 rounded-full bg-white hover:bg-[#bbf421] ring-2 ring-zinc-950 shadow-md cursor-nwse-resize transition-all hover:scale-135 before:absolute before:-inset-3 before:content-['']"
+              title="Drag corner to scale size"
             />
 
-            {/* 2 Horizontal Edge Handles (Drag to resize Box Width!) */}
+            {/* Left & Right Horizontal Pill Grips */}
             <div
               onMouseDown={(e) => handleResizeStart(e, 'w')}
-              className="resize-handle pointer-events-auto absolute top-1/2 -left-2.5 -translate-y-1/2 w-2.5 h-6 rounded-full bg-cyan-400 hover:bg-white hover:scale-125 ring-2 ring-black cursor-ew-resize transition-transform before:absolute before:-inset-2.5 before:content-[''] shadow-md"
+              className="resize-handle pointer-events-auto absolute top-1/2 -left-2 -translate-y-1/2 w-1.5 h-5 rounded-full bg-white hover:bg-[#bbf421] ring-2 ring-zinc-950 shadow-md cursor-ew-resize transition-all hover:scale-125 before:absolute before:-inset-3 before:content-['']"
               title="Drag horizontally to resize box width"
             />
             <div
               onMouseDown={(e) => handleResizeStart(e, 'e')}
-              className="resize-handle pointer-events-auto absolute top-1/2 -right-2.5 -translate-y-1/2 w-2.5 h-6 rounded-full bg-cyan-400 hover:bg-white hover:scale-125 ring-2 ring-black cursor-ew-resize transition-transform before:absolute before:-inset-2.5 before:content-[''] shadow-md"
+              className="resize-handle pointer-events-auto absolute top-1/2 -right-2 -translate-y-1/2 w-1.5 h-5 rounded-full bg-white hover:bg-[#bbf421] ring-2 ring-zinc-950 shadow-md cursor-ew-resize transition-all hover:scale-125 before:absolute before:-inset-3 before:content-['']"
               title="Drag horizontally to resize box width"
             />
 
-            {/* 2 Vertical Edge Handles (Drag to adjust Box Padding / Height) */}
+            {/* Top & Bottom Vertical Pill Grips */}
             <div
               onMouseDown={(e) => handleResizeStart(e, 'n')}
-              className="resize-handle pointer-events-auto absolute -top-2.5 left-1/2 -translate-x-1/2 h-2.5 w-6 rounded-full bg-cyan-400 hover:bg-white hover:scale-125 ring-2 ring-black cursor-ns-resize transition-transform before:absolute before:-inset-2.5 before:content-[''] shadow-md"
-              title="Drag vertically to adjust vertical padding"
+              className="resize-handle pointer-events-auto absolute -top-2 left-1/2 -translate-x-1/2 h-1.5 w-5 rounded-full bg-white hover:bg-[#bbf421] ring-2 ring-zinc-950 shadow-md cursor-ns-resize transition-all hover:scale-125 before:absolute before:-inset-3 before:content-['']"
+              title="Drag vertically to adjust padding"
             />
             <div
               onMouseDown={(e) => handleResizeStart(e, 's')}
-              className="resize-handle pointer-events-auto absolute -bottom-2.5 left-1/2 -translate-x-1/2 h-2.5 w-6 rounded-full bg-cyan-400 hover:bg-white hover:scale-125 ring-2 ring-black cursor-ns-resize transition-transform before:absolute before:-inset-2.5 before:content-[''] shadow-md"
-              title="Drag vertically to adjust vertical padding"
+              className="resize-handle pointer-events-auto absolute -bottom-2 left-1/2 -translate-x-1/2 h-1.5 w-5 rounded-full bg-white hover:bg-[#bbf421] ring-2 ring-zinc-950 shadow-md cursor-ns-resize transition-all hover:scale-125 before:absolute before:-inset-3 before:content-['']"
+              title="Drag vertically to adjust padding"
             />
           </div>
         )}
 
-        {/* Text Content */}
+        {/* Text Content with Butter-Smooth GPU Karaoke Glow */}
         {displayMode === 'karaoke' && words.length > 0 ? (
           words.map((w, idx) => {
             if (!w) return null;
@@ -424,12 +421,12 @@ export function DraggableCaption({
                 key={idx}
                 style={{
                   color: isCurrent ? (style.highlightColor || '#22C55E') : (style.color || '#FFE600'),
-                  transform: isCurrent ? 'scale(1.12)' : 'scale(1)',
+                  transform: isCurrent ? 'scale(1.08)' : 'scale(1)',
                   display: 'inline-block',
-                  transition: 'color 0.08s ease, transform 0.08s ease',
+                  transition: 'color 0.1s ease, transform 0.1s ease, text-shadow 0.1s ease',
                   marginRight: '0.28em',
                   textShadow: isCurrent 
-                    ? `0 0 14px ${style.highlightColor || '#22C55E'}, ${textShadow}`
+                    ? `0 0 16px ${style.highlightColor || '#22C55E'}, ${textShadow}`
                     : textShadow
                 }}
               >
@@ -454,5 +451,3 @@ function hexToRgba(hex = '#000000', alpha = 1) {
   const b = num & 255;
   return `rgba(${r}, ${g}, ${b}, ${alpha ?? 1})`;
 }
-
-
