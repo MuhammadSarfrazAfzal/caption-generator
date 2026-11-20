@@ -146,5 +146,3 @@ export function TimelineBar({
     </div>
   );
 }
-
-// Synchronized playhead timeline rendering
